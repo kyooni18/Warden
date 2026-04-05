@@ -944,15 +944,15 @@ static void describe_zone(const GameState *game) {
 }
 static void show_help(void) {
   printf("\n명령어:\n");
-  printf("  look(둘러보기), map(지도), stats(능력치), inventory(소지품)\n");
-  printf("  quests(퀘스트), rumor(소문), time(시간)\n");
-  printf("  north/south/east/west, go <방향>, travel <방향>\n");
-  printf("  scout(정찰), hunt(사냥), gather(채집), explore(탐사)\n");
-  printf("  talk(대화), shop(상점), forge(대장간), rest(휴식)\n");
-  printf("  use potion, save, load, quit\n");
+  printf("  look [둘러보기], map [지도], stats [능력치], inventory [소지품]\n");
+  printf("  quests [퀘스트], rumor [소문], time [시간]\n");
+  printf("  north/south/east/west [이동], go [방향], travel [방향]\n");
+  printf("  scout [정찰], hunt [사냥], gather [채집], explore [탐사]\n");
+  printf("  talk [대화], shop [상점], forge [대장간], rest [휴식]\n");
+  printf("  use potion [포션 사용], save [저장], load [불러오기], quit [종료]\n");
   printf("\n전투 명령어:\n");
-  printf("  attack(공격), cleave(강공), guard(방어), potion(포션)\n");
-  printf("  bomb(폭탄), flee(도주), status(상태)\n");
+  printf("  attack [공격], cleave [강공], guard [방어], potion [포션]\n");
+  printf("  bomb [폭탄], flee [도주], status [상태]\n");
 }
 static void show_map(const GameState *game) {
   int row;
