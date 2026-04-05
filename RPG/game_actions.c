@@ -197,6 +197,95 @@ void explore_special_location(GameState *game) {
              "긴 숨을 내쉽니다.\n");
     }
     return;
+  case ZONE_DEEPWOOD_HOLLOW:
+    if (game->druid_quest != QUEST_ACTIVE) {
+      printf("드루이드 에이브가 말합니다. \"이 숲은 오래된 의식을 기다리고 있습니다. "
+             "저에게 먼저 말을 걸어주세요.\"\n");
+      advance_time(game, 20);
+      flush_events(game);
+      return;
+    }
+    if (game->druid_quest == QUEST_ACTIVE && game->player.herbs >= 4) {
+      /* Complete druid ritual */
+      game->player.herbs -= 4;
+      game->druid_quest = QUEST_COMPLETE;
+      game->player.spirit_totem = true;
+      game->player.max_hp += 15;
+      game->player.hp = game->player.max_hp;
+      game->doom = clamp_int(game->doom - 1, 0, 12);
+      advance_time(game, 40);
+      flush_events(game);
+      printf("에이브가 약초를 고대 석판 위에 배치하고 의식을 시작합니다. 숲의 기운이 "
+             "당신 주위를 감싸며 영혼의 토템이 가슴속에 자리를 잡습니다. "
+             "최대 체력 +15.\n");
+    } else if (game->druid_quest == QUEST_ACTIVE) {
+      printf("에이브가 조용히 말합니다. \"약초 4개가 필요합니다. 현재 %d개입니다.\"\n",
+             game->player.herbs);
+      advance_time(game, 15);
+      flush_events(game);
+    }
+    return;
+  case ZONE_ANCIENT_BEACON:
+    if (game->beacon_quest != QUEST_ACTIVE) {
+      printf("봉화대 문이 잠겨 있습니다. 봉화지기 오른에게 먼저 말을 걸어 보세요.\n");
+      advance_time(game, 15);
+      flush_events(game);
+      return;
+    }
+    if (game->beacon_lit) {
+      printf("봉화는 이미 밝게 타오르고 있습니다.\n");
+      advance_time(game, 10);
+      flush_events(game);
+      return;
+    }
+    if (game->player.ore < 2 || game->player.herbs < 1) {
+      printf("봉화를 밝히려면 광석 2개와 약초 1개가 필요합니다. "
+             "(현재: 광석 %d, 약초 %d)\n",
+             game->player.ore, game->player.herbs);
+      advance_time(game, 10);
+      flush_events(game);
+      return;
+    }
+    game->player.ore -= 2;
+    game->player.herbs -= 1;
+    game->beacon_lit = true;
+    game->beacon_quest = QUEST_COMPLETE;
+    game->doom = clamp_int(game->doom - 2, 0, 12);
+    advance_time(game, 45);
+    flush_events(game);
+    printf("광석으로 불씨를 만들고 약초 기름을 태워 고대 봉화를 다시 밝힙니다. "
+           "봉화의 빛이 남쪽 하늘을 물들입니다. 파멸도가 2 감소했습니다.\n");
+    return;
+  case ZONE_SHATTERED_VAULT:
+    if (game->vault_quest == QUEST_COMPLETE) {
+      printf("금고는 이미 탐사했습니다. 고대의 기록들이 먼지 속에 잠들어 있습니다.\n");
+      advance_time(game, 15);
+      flush_events(game);
+      return;
+    }
+    printf("먼지 쌓인 금고를 조심스럽게 탐사합니다...\n");
+    advance_time(game, 60);
+    flush_events(game);
+    game->vault_quest = QUEST_COMPLETE;
+    {
+      int gold_found = roll_range(60, 100);
+      game->player.gold += gold_found;
+      game->player.relic_dust += 5;
+      if (game->player.player_class == CLASS_MAGE) {
+        game->player.rune_shards += 3;
+      }
+      printf("왕국의 마지막 보물 창고에서 발굴했습니다: 골드 %d, "
+             "유물 가루 5개",
+             gold_found);
+      if (game->player.player_class == CLASS_MAGE) {
+        printf(", 룬 파편 3개");
+      }
+      printf(".\n");
+      printf("또한 왕국의 진실을 담은 고대 기록을 발견했습니다. "
+             "공허의 왕관은 왕국을 보호하기 위해 만들어진 것이었으나, "
+             "왕의 절망이 그것을 오염시켰습니다...\n");
+    }
+    return;
   default:
     printf("세밀하게 수색해 오래된 지식 조각과 동전을 찾았지만 급한 단서는 없습니다.\n");
     game->player.gold += 3 + rand() % 4;
@@ -298,6 +387,43 @@ void talk_here(GameState *game) {
   case ZONE_LANTERN_WARD:
     printf("전령 나라가 순찰 기록과 구역 바깥 도로의 최신 경고를 전합니다.\n");
     break;
+  case ZONE_DEEPWOOD_HOLLOW:
+    if (game->druid_quest == QUEST_LOCKED) {
+      game->druid_quest = QUEST_ACTIVE;
+      printf("드루이드 에이브가 고목 그늘에서 당신을 바라봅니다. \"숲이 아파하고 있습니다. "
+             "공허의 어둠이 뿌리까지 스며들기 전에 의식을 치러야 합니다. 신선한 약초 4개를 "
+             "가져온다면 숲의 기운을 당신과 나누겠습니다.\"\n");
+    } else if (game->druid_quest == QUEST_ACTIVE) {
+      printf("에이브가 말합니다. \"약초 4개가 필요합니다. 월광 늪이나 숯불 수림, "
+             "혹은 이 심숲 분지에서 채집할 수 있습니다. (현재 %d개)\"\n",
+             game->player.herbs);
+    } else {
+      printf("에이브가 고개를 끄덕입니다. \"숲이 당신을 기억할 것입니다.\"\n");
+      if (rand() % 100 < 40) {
+        game->player.hp = clamp_int(game->player.hp + 8, 0, game->player.max_hp);
+        printf("숲의 기운이 상처를 어루만져 체력이 조금 회복되었습니다.\n");
+      }
+    }
+    break;
+  case ZONE_ANCIENT_BEACON:
+    if (game->beacon_quest == QUEST_LOCKED) {
+      game->beacon_quest = QUEST_ACTIVE;
+      printf("봉화지기 오른이 꺼진 봉화를 바라봅니다. \"이 봉화는 왕국이 살아있을 때부터 "
+             "희망의 빛이었습니다. 광석 2개와 약초 1개면 다시 밝힐 수 있습니다. "
+             "봉화 탑에서 '탐사' 명령으로 점화해주세요.\"\n");
+    } else if (game->beacon_quest == QUEST_ACTIVE) {
+      printf("오른이 말합니다. \"봉화를 밝히려면 광석 2개와 약초 1개가 필요합니다. "
+             "(현재: 광석 %d, 약초 %d) '탐사' 명령으로 점화하세요.\"\n",
+             game->player.ore, game->player.herbs);
+      game->player.hp = game->player.max_hp;
+      printf("오른이 상처를 돌봐줍니다. 체력이 완전히 회복되었습니다.\n");
+    } else {
+      printf("오른이 활활 타오르는 봉화를 바라보며 웃습니다. \"빛이 돌아왔습니다. "
+             "왕국이 조금 더 버틸 수 있을 겁니다.\"\n");
+      game->player.hp = game->player.max_hp;
+      printf("오른이 상처를 돌봐줍니다. 체력이 완전히 회복되었습니다.\n");
+    }
+    break;
   default:
     printf("이곳에는 대화할 상대가 없습니다.\n");
     return;
@@ -327,12 +453,14 @@ void shop_here(GameState *game) {
   } else if (game->player.zone == ZONE_BRASS_MARKET) {
     stock = &game->market_potions;
   }
-  printf("`buy potion`, `buy bomb`, `leave` 중 하나를 입력하세요.\n");
+  printf("`buy potion`, `buy bomb`, `buy rune`, `sell herb`, `sell ore`, `sell dust`, `leave` 중 하나를 입력하세요.\n");
   while (game->running) {
     int price = potion_price(game, port_prices);
     int bomb_price = port_prices ? 18 : 20;
-    printf("재고: 포션 %d | 포션 %dg | 폭탄 %dg\n",
-           stock != NULL ? *stock : 2, price, bomb_price);
+    int rune_price = 15;
+    printf("재고: 포션 %d | 포션 %dg | 폭탄 %dg | 룬 %dg\n",
+           stock != NULL ? *stock : 2, price, bomb_price, rune_price);
+    printf("판매: 약초 3g | 광석 4g | 유물가루 8g\n");
     if (!read_command("상점> ", input, sizeof(input))) {
       game->running = false;
       return;
@@ -375,6 +503,54 @@ void shop_here(GameState *game) {
       flush_events(game);
       continue;
     }
+    if (strcmp(command, "buy rune") == 0) {
+      if (game->player.gold < rune_price) {
+        printf("골드가 부족합니다.\n");
+        continue;
+      }
+      game->player.gold -= rune_price;
+      game->player.rune_shards++;
+      printf("룬 파편을 구매했습니다.\n");
+      advance_time(game, 10);
+      flush_events(game);
+      continue;
+    }
+    if (strcmp(command, "sell herb") == 0) {
+      if (game->player.herbs <= 0) {
+        printf("판매할 약초가 없습니다.\n");
+        continue;
+      }
+      game->player.herbs--;
+      game->player.gold += 3;
+      printf("약초를 3골드에 판매했습니다.\n");
+      advance_time(game, 5);
+      flush_events(game);
+      continue;
+    }
+    if (strcmp(command, "sell ore") == 0) {
+      if (game->player.ore <= 0) {
+        printf("판매할 광석이 없습니다.\n");
+        continue;
+      }
+      game->player.ore--;
+      game->player.gold += 4;
+      printf("광석을 4골드에 판매했습니다.\n");
+      advance_time(game, 5);
+      flush_events(game);
+      continue;
+    }
+    if (strcmp(command, "sell dust") == 0) {
+      if (game->player.relic_dust <= 0) {
+        printf("판매할 유물 가루가 없습니다.\n");
+        continue;
+      }
+      game->player.relic_dust--;
+      game->player.gold += 8;
+      printf("유물 가루를 8골드에 판매했습니다.\n");
+      advance_time(game, 5);
+      flush_events(game);
+      continue;
+    }
     printf("상인이 그 요청을 이해하지 못했습니다.\n");
   }
 }
@@ -385,9 +561,10 @@ void forge_here(GameState *game) {
     printf("이곳에는 작동 가능한 대장간이 없습니다.\n");
     return;
   }
-  printf("`craft blade`, `craft mail`, `craft bomb`, `leave` 중 하나를 입력하세요.\n");
+  printf("`craft blade`, `craft mail`, `craft bomb`, `craft rune`, `leave` 중 하나를 입력하세요.\n");
   while (game->running) {
-    printf("광석 %d | 검 4개 | 갑옷 6개 | 폭탄 2개\n", game->player.ore);
+    printf("광석 %d | 검 4개 | 갑옷 6개 | 폭탄 2개 | 룬 증폭기 3개\n",
+           game->player.ore);
     if (!read_command("대장간> ", input, sizeof(input))) {
       game->running = false;
       return;
@@ -440,6 +617,18 @@ void forge_here(GameState *game) {
       flush_events(game);
       continue;
     }
+    if (strcmp(command, "craft rune") == 0) {
+      if (game->player.ore < 3) {
+        printf("광석 3개가 필요합니다.\n");
+        continue;
+      }
+      game->player.ore -= 3;
+      game->player.rune_shards += 2;
+      printf("광석을 정제해 룬 파편 2개를 만들었습니다.\n");
+      advance_time(game, 30);
+      flush_events(game);
+      continue;
+    }
     printf("대장간이 그 명령에는 반응하지 않습니다.\n");
   }
 }
@@ -478,10 +667,68 @@ static bool move_player(GameState *game, const char *direction) {
            "있습니다.\n");
     return false;
   }
+  if (next_zone == ZONE_SHATTERED_VAULT && !game->final_boss_defeated) {
+    printf("봉인된 문들이 버티고 있습니다. 공허의 왕관이 부서지기 전까지 이 너머로는 "
+           "나아갈 수 없습니다.\n");
+    return false;
+  }
   game->player.zone = next_zone;
   game->player.discovered[next_zone] = true;
   advance_time(game, 30);
   flush_events(game);
+  /* Random travel event (30% chance) */
+  if (!kZones[next_zone].safe && rand() % 100 < 30) {
+    int roll = rand() % 6;
+    switch (roll) {
+    case 0: {
+      int found = roll_range(3, 12);
+      game->player.gold += found;
+      printf("[여행] 길가에서 흩어진 동전 꾸러미를 발견했습니다. 골드 +%d.\n", found);
+      break;
+    }
+    case 1:
+      game->player.herbs++;
+      printf("[여행] 바위틈에서 야생 약초 한 묶음을 발견했습니다.\n");
+      break;
+    case 2:
+      if (kZones[next_zone].danger > 0) {
+        printf("[여행] 이동 중 급습을 받았습니다!\n");
+        hunt_current_zone(game);
+      }
+      break;
+    case 3: {
+      printf("[여행] 길가에 부상당한 여행자가 쓰러져 있습니다.\n");
+      if (game->player.potions > 0) {
+        game->player.potions--;
+        int gratitude = roll_range(10, 20);
+        game->player.gold += gratitude;
+        printf("       포션을 나눠주자 감사해하며 숨겨둔 동전을 건넵니다. 골드 +%d.\n",
+               gratitude);
+      } else {
+        printf("       나눠줄 포션이 없습니다. 여행자가 간신히 몸을 일으켜 이동합니다.\n");
+      }
+      break;
+    }
+    case 4:
+      if (game->player.player_class == CLASS_MAGE || rand() % 100 < 30) {
+        game->player.rune_shards++;
+        printf("[여행] 바위에 새겨진 마법진에서 룬 파편을 수집했습니다.\n");
+      } else {
+        int found = roll_range(2, 7);
+        game->player.gold += found;
+        printf("[여행] 황량한 길가에서 낡은 동전을 줍습니다. 골드 +%d.\n", found);
+      }
+      break;
+    case 5: {
+      int heal = roll_range(3, 8);
+      game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+      printf("[여행] 잠시 멈춰 숨을 고르며 체력 +%d를 회복했습니다.\n", heal);
+      break;
+    }
+    default:
+      break;
+    }
+  }
   describe_zone(game);
   return true;
 }

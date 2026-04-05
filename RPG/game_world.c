@@ -299,6 +299,83 @@ const ZoneData kZones[ZONE_COUNT] = {
         .forge = false,
         .archive = false,
     },
+    [ZONE_DEEPWOOD_HOLLOW] = {
+        .name = "심숲 분지",
+        .short_name = "심숲",
+        .description =
+            "숯불 수림 남쪽, 고대의 나무가 하늘을 가리는 분지입니다. 수천 년 된 고목 사이로 "
+            "드루이드의 제단과 이끼 낀 석상이 서 있으며, 공기는 두꺼운 생명의 향기로 가득 "
+            "합니다. 이곳의 정령들은 아직도 살아 숨쉽니다.",
+        .scout_text =
+            "드루이드 에이브가 성소를 지킵니다. 희귀한 약초가 지천에 자라지만, 숲의 "
+            "수호령과 가시 정령이 침입자를 달가워하지 않습니다.",
+        .npc = "드루이드 에이브",
+        .resource = RESOURCE_HERB,
+        .danger = 5,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_MAGMA_RIFT] = {
+        .name = "용암 균열",
+        .short_name = "용균",
+        .description =
+            "흑요 분화구 남쪽, 지각이 갈라지며 드러난 거대한 용암 지대입니다. 붉은 용암이 "
+            "갈라진 암반 틈 사이로 끊임없이 흘러내리고, 공기는 황 냄새와 열기로 숨이 막힙니다. "
+            "극한 환경이지만 가장 단단한 광석이 이곳에서만 나옵니다.",
+        .scout_text =
+            "용암 균열은 최후의 시험장입니다. 용암 골렘과 화염 폭군이 배회하며, 극소수의 "
+            "단련된 대장장이만이 이곳의 불꽃 앞에서 최고의 강철을 뽑아냅니다.",
+        .npc = "용암만이 노래합니다.",
+        .resource = RESOURCE_ORE,
+        .danger = 8,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = true,
+        .archive = false,
+    },
+    [ZONE_ANCIENT_BEACON] = {
+        .name = "고대 봉화",
+        .short_name = "봉화",
+        .description =
+            "폐허 대성당 남쪽 절벽 위에 자리한 오래된 봉화대입니다. 한때 왕국 전역에 "
+            "신호를 보내던 이 봉화는 오래전 꺼졌습니다. 봉화지기 오른이 혼자 이곳을 지키며 "
+            "봉화를 다시 밝히려는 희망을 잃지 않고 있습니다.",
+        .scout_text =
+            "봉화지기 오른은 친절하지만 지쳐 있습니다. 봉화를 다시 밝히면 왕국 전역에 "
+            "희망의 빛을 보낼 수 있습니다. 이곳은 비교적 안전하지만 길 잃은 병사들이 "
+            "때로 이곳까지 헤매어 옵니다.",
+        .npc = "봉화지기 오른",
+        .resource = RESOURCE_NONE,
+        .danger = 3,
+        .safe = true,
+        .merchant = false,
+        .healer = true,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_SHATTERED_VAULT] = {
+        .name = "파쇄 금고",
+        .short_name = "금고",
+        .description =
+            "공허 왕좌 아래 깊이 묻혀 있던 왕국의 마지막 비밀 금고입니다. 왕관이 부서지자 "
+            "봉인이 풀리며 이 공간이 드러났습니다. 수백 년간 잠들어 있던 보물과 고대 기록이 "
+            "먼지 속에 잠들어 있습니다.",
+        .scout_text =
+            "왕관의 사슬에서 해방된 공간입니다. 위험은 없지만, 이곳에는 왕국의 진실이 "
+            "담긴 기록과 그 어느 곳에서도 찾을 수 없는 보물이 잠들어 있습니다.",
+        .npc = "오래된 침묵만이 흐릅니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 0,
+        .safe = true,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = true,
+    },
 };
 const char *kWeatherNames[WEATHER_COUNT] = {
     "맑음", "비", "안개", "강풍", "화산재", "폭풍"};

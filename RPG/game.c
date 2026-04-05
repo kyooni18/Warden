@@ -14,6 +14,24 @@ int rpg_run(void) {
   srand((unsigned int)time(NULL));
   init_game(&game);
   print_intro();
+  /* Class selection */
+  printf("\n직업을 선택하세요:\n");
+  printf("  1. 전사  - 높은 체력/방어, parry(막기), bash(방패 강타) 특기\n");
+  printf("  2. 척후  - 빠른 공격/이탈, backstab(기습), vanish(은신) 특기\n");
+  printf("  3. 마법사 - 마력 공격, fireball(화염구), frost(냉기 화살) 특기\n");
+  if (read_command("선택 (1/2/3, 엔터=전사): ", input, sizeof(input))) {
+    canonicalize_input(input, command, sizeof(command));
+    if (strcmp(command, "2") == 0) {
+      select_class(&game, CLASS_SCOUT);
+      printf("척후 선택. 빠른 발과 날카로운 눈으로 길을 개척하십시오.\n");
+    } else if (strcmp(command, "3") == 0) {
+      select_class(&game, CLASS_MAGE);
+      printf("마법사 선택. 아는 것이 힘입니다. 룬 파편으로 화염구와 냉기 화살을 사용하세요.\n");
+    } else {
+      select_class(&game, CLASS_WARRIOR);
+      printf("전사 선택. 강철이 말하게 하십시오.\n");
+    }
+  }
   if (read_command("수호자의 이름을 입력하세요 (빈칸이면 수호자): ", input,
                    sizeof(input)) &&
       !is_blank(input)) {
@@ -22,7 +40,7 @@ int rpg_run(void) {
   printf("\n%s이(가) 남부 순찰대의 불빛이 희미해지는 저녁, 엠버폴 관문에 도착했습니다.\n",
          game.player.name);
   describe_zone(&game);
-  show_help();
+  show_help(&game);
   while (game.running) {
     if (!read_command("\n명령> ", input, sizeof(input))) {
       break;
@@ -35,7 +53,7 @@ int rpg_run(void) {
       continue;
     }
     if (strcmp(command, "help") == 0 || strcmp(command, "도움말") == 0) {
-      show_help();
+      show_help(&game);
     } else if (strcmp(command, "look") == 0 || strcmp(command, "l") == 0) {
       describe_zone(&game);
     } else if (strcmp(command, "map") == 0) {

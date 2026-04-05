@@ -57,6 +57,14 @@ const char *time_band(const GameState *game) {
 static bool zone_is_safe(int zone) {
   return kZones[zone].safe;
 }
+const char *class_name(PlayerClass cls) {
+  switch (cls) {
+  case CLASS_WARRIOR: return "전사";
+  case CLASS_SCOUT:   return "척후";
+  case CLASS_MAGE:    return "마법사";
+  default:            return "수호자";
+  }
+}
 bool zone_has_merchant(const GameState *game, int zone) {
   return kZones[zone].merchant || game->caravan_zone == zone;
 }
@@ -64,7 +72,7 @@ static int zone_north(int zone) {
   return zone >= 4 ? zone - 4 : ZONE_NONE;
 }
 static int zone_south(int zone) {
-  return zone < 12 ? zone + 4 : ZONE_NONE;
+  return zone < 16 ? zone + 4 : ZONE_NONE;
 }
 static int zone_west(int zone) {
   return zone % 4 != 0 ? zone - 1 : ZONE_NONE;
@@ -243,6 +251,7 @@ static bool enqueue_repeating_task(GameState *game, void (*task)(void *),
 void init_game(GameState *game) {
   memset(game, 0, sizeof(*game));
   snprintf(game->player.name, sizeof(game->player.name), "수호자");
+  game->player.player_class = CLASS_WARRIOR;
   game->player.zone = ZONE_EMBERFALL_GATE;
   game->player.level = 1;
   game->player.xp_to_next = 28;
@@ -274,6 +283,41 @@ void init_game(GameState *game) {
                          FSScheduler_Priority_BACKGROUND);
   refresh_rumor(game);
 }
+void select_class(GameState *game, PlayerClass cls) {
+  game->player.player_class = cls;
+  switch (cls) {
+  case CLASS_WARRIOR:
+    game->player.max_hp = 38;
+    game->player.hp = 38;
+    game->player.strength = 8;
+    game->player.guard = 5;
+    game->player.gold = 20;
+    game->player.potions = 2;
+    game->player.bombs = 1;
+    game->player.rune_shards = 0;
+    break;
+  case CLASS_SCOUT:
+    game->player.max_hp = 25;
+    game->player.hp = 25;
+    game->player.strength = 7;
+    game->player.guard = 3;
+    game->player.gold = 28;
+    game->player.potions = 3;
+    game->player.bombs = 2;
+    game->player.rune_shards = 0;
+    break;
+  case CLASS_MAGE:
+    game->player.max_hp = 22;
+    game->player.hp = 22;
+    game->player.strength = 5;
+    game->player.guard = 2;
+    game->player.gold = 30;
+    game->player.potions = 3;
+    game->player.bombs = 0;
+    game->player.rune_shards = 3;
+    break;
+  }
+}
 void shutdown_game(GameState *game) {
   Feather_deinit(&game->feather);
 }
@@ -298,11 +342,15 @@ bool save_game(const GameState *game, const char *path) {
   data.caravan_quest = (int)game->caravan_quest;
   data.fragments_quest = (int)game->fragments_quest;
   data.crown_quest = (int)game->crown_quest;
+  data.beacon_quest = (int)game->beacon_quest;
+  data.druid_quest = (int)game->druid_quest;
+  data.vault_quest = (int)game->vault_quest;
   memcpy(data.fragment_found, game->fragment_found, sizeof(data.fragment_found));
   data.bandit_reeve_defeated = game->bandit_reeve_defeated;
   data.dawn_key_forged = game->dawn_key_forged;
   data.basilica_blessing = game->basilica_blessing;
   data.final_boss_defeated = game->final_boss_defeated;
+  data.beacon_lit = game->beacon_lit;
   data.running = game->running;
   if (fwrite(&data, sizeof(data), 1, file) != 1) {
     fclose(file);
@@ -344,11 +392,15 @@ bool load_game(GameState *game, const char *path) {
   game->caravan_quest = (QuestStage)data.caravan_quest;
   game->fragments_quest = (QuestStage)data.fragments_quest;
   game->crown_quest = (QuestStage)data.crown_quest;
+  game->beacon_quest = (QuestStage)data.beacon_quest;
+  game->druid_quest = (QuestStage)data.druid_quest;
+  game->vault_quest = (QuestStage)data.vault_quest;
   memcpy(game->fragment_found, data.fragment_found, sizeof(game->fragment_found));
   game->bandit_reeve_defeated = data.bandit_reeve_defeated;
   game->dawn_key_forged = data.dawn_key_forged;
   game->basilica_blessing = data.basilica_blessing;
   game->final_boss_defeated = data.final_boss_defeated;
+  game->beacon_lit = data.beacon_lit;
   game->running = data.running;
   game->event_count = 0;
   game->combat.active = false;
