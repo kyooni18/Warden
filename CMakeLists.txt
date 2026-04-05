@@ -15,7 +15,7 @@ add_executable(warden
 
 target_link_libraries(warden PRIVATE Feather::Feather)
 
-set_target_properties(awrden PROPERTIES
+set_target_properties(warden PROPERTIES
     OUTPUT_NAME Warden
     C_STANDARD 99
     C_STANDARD_REQUIRED YES
