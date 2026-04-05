@@ -453,7 +453,8 @@ void shop_here(GameState *game) {
   } else if (game->player.zone == ZONE_BRASS_MARKET) {
     stock = &game->market_potions;
   }
-  printf("`buy potion`, `buy bomb`, `buy rune`, `sell herb`, `sell ore`, `sell dust`, `leave` 중 하나를 입력하세요.\n");
+  printf("`buy potion`, `buy bomb`, `buy rune`\n"
+         "`sell herb`, `sell ore`, `sell dust`, `leave`\n");
   while (game->running) {
     int price = potion_price(game, port_prices);
     int bomb_price = port_prices ? 18 : 20;

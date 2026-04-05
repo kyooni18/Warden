@@ -715,10 +715,10 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
     } else if (game->combat.enemy.burns_player && rand() % 100 < 30) {
       enemy_damage = compute_damage(game->combat.enemy.attack,
                                     player_defense_value(game));
-      game->combat.player_bleed_turns = 0; /* burns override bleed display */
-      printf("%s이(가) 불꽃을 내뿜습니다!\n", game->combat.enemy.name);
-      /* Apply burn as extra damage over next turns via bleed mechanic */
-      game->combat.player_bleed_turns = 2; /* reuse bleed field for burn damage */
+      /* Burn causes damage over time; reuse player_bleed_turns to track DoT ticks */
+      game->combat.player_bleed_turns = 2;
+      printf("%s이(가) 불꽃을 내뿜습니다! 화상으로 계속 피해를 입습니다.\n",
+             game->combat.enemy.name);
     } else if (game->combat.enemy.bleeds_player && rand() % 100 < 30) {
       enemy_damage = compute_damage(game->combat.enemy.attack,
                                     player_defense_value(game));
@@ -746,6 +746,8 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
     /* ---- Apply parry (warrior) ---- */
     if (game->combat.parry_active && enemy_damage > 0) {
       int counter = enemy_damage / 4;
+      /* Ceiling division: parry reduces incoming damage to ~25% (rounded up),
+         ensuring at least 1 damage if the attack was non-zero */
       enemy_damage = (enemy_damage + 3) / 4;
       game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - counter, 0,
                                         game->combat.enemy.max_hp);
