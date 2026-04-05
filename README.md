@@ -23,3 +23,10 @@ make run-rpg
 ```
 
 The executable is generated at `build/CLITextRPG`.
+
+## Notes
+
+- The game now shows core UI prompts/messages in Korean.
+- In-game commands include save/load support:
+  - `save` to write progress to `savegame.dat`
+  - `load` to restore progress from `savegame.dat`
