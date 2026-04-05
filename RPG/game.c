@@ -180,16 +180,16 @@ typedef struct SaveData {
 } SaveData;
 static const ZoneData kZones[ZONE_COUNT] = {
     [ZONE_EMBERFALL_GATE] = {
-        .name = "Emberfall Gate",
-        .short_name = "EMBR",
+        .name = "엠버폴 관문",
+        .short_name = "관문",
         .description =
-            "A basalt gatehouse watches the old kingdom road. Supply braziers "
-            "burn all night, and every traveler passing south whispers about "
-            "the dead court stirring beyond the ashfields.",
+            "현무암 관문이 옛 왕국 가도를 지키고 있습니다. 보급 화로는 밤새 타오르고, "
+            "남쪽으로 향하는 모든 여행자는 잿빛 벌판 너머에서 죽은 궁정이 깨어난다는 "
+            "소문을 속삭입니다.",
         .scout_text =
-            "Fresh boot prints, quartermaster banners, and a safe camp. This "
-            "is the best place to regroup before marching deeper.",
-        .npc = "Quartermaster Iven",
+            "새로운 군화 자국, 병참 깃발, 안전한 야영지. 더 깊이 들어가기 전에 "
+            "재정비하기 가장 좋은 곳입니다.",
+        .npc = "병참장교 아이븐",
         .resource = RESOURCE_NONE,
         .danger = 0,
         .safe = true,
@@ -199,16 +199,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_BRASS_MARKET] = {
-        .name = "Brass Market",
-        .short_name = "BRAS",
+        .name = "황동 시장",
+        .short_name = "시장",
         .description =
-            "The market survives under patched canvas awnings, all lantern-glow "
-            "and hard bargains. Smugglers, relic buyers, and caravan guards "
-            "trade rumors as quickly as coin.",
+            "기워 붙인 천막 아래 시장이 간신히 버티고 있습니다. 등불과 흥정이 가득한 "
+            "곳으로, 밀수꾼·유물 상인·상단 경비가 동전만큼 빠르게 소문을 주고받습니다.",
         .scout_text =
-            "Crowded, loud, and useful. Potions move fast here, and frightened "
-            "merchants keep pointing toward Ironwood Pass.",
-        .npc = "Merchant Sal",
+            "혼잡하고 시끄럽지만 쓸모 있는 곳입니다. 포션이 빠르게 팔려 나가고, 겁먹은 "
+            "상인들은 계속 철목 고개 쪽을 가리킵니다.",
+        .npc = "상인 살",
         .resource = RESOURCE_NONE,
         .danger = 1,
         .safe = true,
@@ -218,17 +217,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_LANTERN_WARD] = {
-        .name = "Lantern Ward",
-        .short_name = "LANT",
+        .name = "등불 구역",
+        .short_name = "등구",
         .description =
-            "Rows of watchtowers and narrow alleys surround a district that "
-            "refuses to sleep. Couriers carry sealed orders while archivists "
-            "hunt for anyone brave enough to follow old maps.",
+            "줄지은 감시탑과 좁은 골목이 잠들지 않는 구역을 둘러싸고 있습니다. 전령은 "
+            "봉인된 명령서를 나르고, 기록관들은 낡은 지도를 따라갈 용감한 이를 찾습니다.",
         .scout_text =
-            "The ward is secure, though every lookout is watching the southern "
-            "roads. Couriers mention a moving caravan camp and strange weather "
-            "from the cliffs.",
-        .npc = "Courier Nara",
+            "구역은 안전하지만 모든 망루가 남쪽 길을 주시하고 있습니다. 전령들은 이동 "
+            "상단 야영지와 절벽 쪽의 기이한 날씨를 언급합니다.",
+        .npc = "전령 나라",
         .resource = RESOURCE_NONE,
         .danger = 1,
         .safe = true,
@@ -238,16 +235,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_WHISPER_LIBRARY] = {
-        .name = "Whisper Library",
-        .short_name = "WHIS",
+        .name = "속삭임 도서관",
+        .short_name = "도관",
         .description =
-            "Shelves lean like broken ribs around a cold observatory dome. The "
-            "library still hums with warding sigils, and every table is buried "
-            "under maps of the drowned archive, frost road, and crater rim.",
+            "부러진 갈비뼈처럼 기울어진 서가가 차가운 관측 돔을 에워쌉니다. 도서관엔 "
+            "여전히 결계 문양의 울림이 남아 있고, 모든 탁자는 침수 기록고·빙설 길·"
+            "분화구 가장자리 지도로 덮여 있습니다.",
         .scout_text =
-            "Safe walls, fragile lore. The archivists know how to read relic "
-            "shards, but they need someone willing to retrieve them first.",
-        .npc = "Archivist Sen",
+            "안전한 벽, 위태로운 지식. 기록관들은 유물 파편을 해독할 수 있지만, 먼저 "
+            "가져와 줄 사람이 필요합니다.",
+        .npc = "기록관 센",
         .resource = RESOURCE_NONE,
         .danger = 1,
         .safe = true,
@@ -257,16 +254,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = true,
     },
     [ZONE_IRONWOOD_PASS] = {
-        .name = "Ironwood Pass",
-        .short_name = "IRON",
+        .name = "철목 고개",
+        .short_name = "철목",
         .description =
-            "Black pines knot around a steep road cut into red stone. The pass "
-            "echoes with wagon wheels, bandit whistles, and the cracking sound "
-            "of old trees split by lightning.",
+            "검은 소나무가 붉은 암석을 가른 가파른 길 주변에 얽혀 있습니다. 고개에는 "
+            "수레 바퀴 소리, 도적의 휘파람, 벼락에 갈라진 고목의 파열음이 메아리칩니다.",
         .scout_text =
-            "Bandits favor the ridgeline, wolves keep the lower brush, and rich "
-            "veins of ore show through the road cuts.",
-        .npc = "No steady ally remains here.",
+            "도적은 능선을 장악하고 늑대는 낮은 수풀을 맴돕니다. 도로 절개면에는 풍부한 "
+            "광맥이 드러나 있습니다.",
+        .npc = "이곳에는 믿을 만한 동맹이 없습니다.",
         .resource = RESOURCE_ORE,
         .danger = 2,
         .safe = false,
@@ -276,16 +272,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_VERDANT_ABBEY] = {
-        .name = "Verdant Abbey",
-        .short_name = "ABBY",
+        .name = "청록 수도원",
+        .short_name = "수원",
         .description =
-            "A half-ruined monastery blooms with medicinal ivy and moonflowers. "
-            "Its chapel bells are gone, but the resident sisters still mend "
-            "armor, stitch wounds, and keep records of the dying countryside.",
+            "반쯤 무너진 수도원에는 약초 담쟁이와 월광화가 무성합니다. 예배당 종은 "
+            "사라졌지만 수녀들은 여전히 갑옷을 고치고 상처를 꿰매며 죽어가는 시골의 "
+            "기록을 남깁니다.",
         .scout_text =
-            "This is the gentlest place left in the south. The sisters heal "
-            "the desperate, and they need herbs from the fen to keep doing it.",
-        .npc = "Sister Elowen",
+            "남부에 남은 가장 온화한 장소입니다. 수녀들은 절박한 이들을 치료하며, 이를 "
+            "이어가기 위해 늪의 약초가 필요합니다.",
+        .npc = "수녀 엘로웬",
         .resource = RESOURCE_NONE,
         .danger = 1,
         .safe = true,
@@ -295,16 +291,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_MOONFEN] = {
-        .name = "Moonfen",
-        .short_name = "MOON",
+        .name = "월광 늪",
+        .short_name = "월늪",
         .description =
-            "Silver reeds and black water stretch beneath drifting lantern "
-            "fungus. The fen looks serene from a distance, right up until "
-            "something with too many eyes moves beneath the surface.",
+            "흘러다니는 등불 버섯 아래로 은빛 갈대와 검은 물이 펼쳐집니다. 멀리서 보면 "
+            "평온하지만, 눈이 지나치게 많은 무언가가 수면 아래서 움직이기 전까지만 "
+            "그렇습니다.",
         .scout_text =
-            "Moonleaf herbs grow thick here, but so do leeches and mire witches. "
-            "Slow steps keep you alive longer than brave ones.",
-        .npc = "Only the marsh answers back.",
+            "월엽초가 무성하지만 거머리와 늪 마녀도 함께 번성합니다. 용기보다 신중한 "
+            "발걸음이 더 오래 살게 해줍니다.",
+        .npc = "늪만이 메아리칩니다.",
         .resource = RESOURCE_HERB,
         .danger = 3,
         .safe = false,
@@ -314,16 +310,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_STORMWATCH_CLIFFS] = {
-        .name = "Stormwatch Cliffs",
-        .short_name = "CLIF",
+        .name = "폭풍감시 절벽",
+        .short_name = "절벽",
         .description =
-            "Jagged cliffs rise above a grey sea where wrecked skiffs turn in "
-            "the surf. Gale banners snap between watch posts, and every ledge "
-            "feels one bad gust away from becoming a grave.",
+            "난삽한 절벽이 회색 바다 위로 솟아 있습니다. 난파선 조각이 파도에 휩쓸리고, "
+            "감시 초소 사이로 바람 깃발이 펄럭입니다. 모든 바위턱이 한 번의 돌풍만으로 "
+            "무덤이 될 듯합니다.",
         .scout_text =
-            "Fast raiders strike from the ledges here. When the wind turns, the "
-            "cliffs become a gauntlet of blind corners and shrieking air.",
-        .npc = "A deserted signal fire crackles.",
+            "민첩한 약탈자들이 이곳 바위턱에서 기습합니다. 바람이 돌아서면 절벽은 사각지대와 "
+            "비명 같은 바람으로 가득한 시련장이 됩니다.",
+        .npc = "버려진 봉화만 타닥거립니다.",
         .resource = RESOURCE_NONE,
         .danger = 4,
         .safe = false,
@@ -333,16 +329,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_ASHEN_QUARRY] = {
-        .name = "Ashen Quarry",
-        .short_name = "QUAR",
+        .name = "잿빛 채석장",
+        .short_name = "채석",
         .description =
-            "The quarry floor glows with old fire. Chain lifts hang over broken "
-            "slabs, and abandoned forges still hold enough heat to temper new "
-            "steel if someone brings the right ore.",
+            "채석장 바닥엔 오래된 불빛이 남아 있습니다. 부서진 석판 위로 체인 리프트가 "
+            "매달려 있고, 버려진 대장간엔 적절한 광석만 있다면 새 강철을 단련할 열이 "
+            "아직 남아 있습니다.",
         .scout_text =
-            "Good ore, bad company. Quarry dead and slag brutes roam the pits, "
-            "but a skilled hand could still rework the old anvils.",
-        .npc = "The forge can still be worked.",
+            "좋은 광석, 나쁜 동행. 채석장 망자와 슬래그 괴수가 구덩이를 배회하지만, "
+            "숙련된 손이라면 낡은 모루를 다시 쓸 수 있습니다.",
+        .npc = "대장간은 아직 사용할 수 있습니다.",
         .resource = RESOURCE_ORE,
         .danger = 4,
         .safe = false,
@@ -352,16 +348,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_SUNKEN_ARCHIVE] = {
-        .name = "Sunken Archive",
-        .short_name = "SUNK",
+        .name = "침수 기록고",
+        .short_name = "기록",
         .description =
-            "A library district collapsed into the tidal basin decades ago. "
-            "Marble stairs vanish underwater between tilted stacks, and drowned "
-            "scribes still patrol the catalog halls below the surface.",
+            "수십 년 전 도서 지구가 조수 분지로 무너져 내렸습니다. 기울어진 서가 사이 "
+            "대리석 계단은 물속으로 사라지고, 익사한 서기관들이 수면 아래 목록 회랑을 "
+            "여전히 순찰합니다.",
         .scout_text =
-            "Old wards flicker beneath the waterline. If a relic fragment "
-            "survived anywhere, one likely rests in the curator vaults below.",
-        .npc = "Only the tide keeps count.",
+            "수면 아래 오래된 결계가 깜박입니다. 유물 파편이 남아 있다면 아래의 "
+            "큐레이터 금고에 있을 가능성이 큽니다.",
+        .npc = "조수만이 시간을 셉니다.",
         .resource = RESOURCE_NONE,
         .danger = 5,
         .safe = false,
@@ -371,16 +367,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = true,
     },
     [ZONE_GLOAM_PORT] = {
-        .name = "Gloam Port",
-        .short_name = "PORT",
+        .name = "황혼 항구",
+        .short_name = "항구",
         .description =
-            "Ships no longer sail from the port, but its piers still support "
-            "brokers, ferrymen, and scavengers who work by lantern and hook. "
-            "The harbor master knows more than she says.",
+            "더 이상 배가 떠나지 않지만 부두에는 중개인, 뱃사공, 수집꾼이 등불과 갈고리로 "
+            "일을 이어갑니다. 항만장은 말보다 더 많은 것을 알고 있습니다.",
         .scout_text =
-            "Supplies can still be bought here, and old captains chart the road "
-            "to Frostspire better than any surviving map.",
-        .npc = "Captain Mirelle",
+            "여기서는 아직 보급품을 살 수 있고, 노선에 익숙한 선장들은 빙첨로로 가는 길을 "
+            "어떤 지도보다 정확히 압니다.",
+        .npc = "미렐 선장",
         .resource = RESOURCE_NONE,
         .danger = 2,
         .safe = true,
@@ -390,16 +385,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_FROSTSPIRE_TRAIL] = {
-        .name = "Frostspire Trail",
-        .short_name = "FROS",
+        .name = "빙첨로",
+        .short_name = "빙첨",
         .description =
-            "The road narrows into a frozen shelf beneath shattered statues. "
-            "Snow never melts here; it simply layers over the bones of every "
-            "caravan that tried to outrun the mountain dead.",
+            "부서진 석상 아래 길은 얼어붙은 선반 지형으로 좁아집니다. 이곳의 눈은 녹지 "
+            "않고, 산의 망자를 피하려다 쓰러진 모든 상단의 뼈 위에 층층이 쌓입니다.",
         .scout_text =
-            "The trail is quiet in the worst possible way. Revenants wait under "
-            "the snow, and the cold itself bites like a predator.",
-        .npc = "The mountain wind answers every question with teeth.",
+            "이 길의 고요함은 가장 불길한 종류입니다. 망령이 눈 아래 숨어 있고, 추위 "
+            "자체가 포식자처럼 물어뜯습니다.",
+        .npc = "산바람은 모든 질문에 이빨로 답합니다.",
         .resource = RESOURCE_NONE,
         .danger = 6,
         .safe = false,
@@ -409,16 +403,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_CINDER_GROVE] = {
-        .name = "Cinder Grove",
-        .short_name = "GROV",
+        .name = "숯불 수림",
+        .short_name = "수림",
         .description =
-            "Charred trunks stand around a grove that somehow still flowers. "
-            "The soil is warm, the air smells of cedar and ash, and rare herbs "
-            "push through the soot after every storm.",
+            "그을린 나무줄기 사이에서도 이상하게 꽃이 피는 숲입니다. 흙은 따뜻하고 공기엔 "
+            "삼나무와 재 냄새가 섞여 있으며, 폭풍 뒤마다 희귀 약초가 그을음 사이로 "
+            "돋아납니다.",
         .scout_text =
-            "This grove rewards careful gathering. Ember stags and thornhexers "
-            "both hide in the smoke when the weather turns.",
-        .npc = "Only antler marks scar the bark.",
+            "이 숲은 신중한 채집에 보답합니다. 날씨가 바뀌면 불사슴과 가시주술사가 연기 "
+            "속에 숨어듭니다.",
+        .npc = "수피엔 뿔자국만 남아 있습니다.",
         .resource = RESOURCE_HERB,
         .danger = 4,
         .safe = false,
@@ -428,16 +422,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_OBSIDIAN_CRATER] = {
-        .name = "Obsidian Crater",
-        .short_name = "CRAT",
+        .name = "흑요 분화구",
+        .short_name = "분화",
         .description =
-            "A vast impact bowl of black glass and red vapor. Lava veins pulse "
-            "beneath the crust, and cultists still treat the crater rim like a "
-            "cathedral built for something buried beneath it.",
+            "검은 유리질 지면과 붉은 증기가 뒤엉킨 거대한 충돌 분지입니다. 지각 아래 "
+            "용암맥이 맥박치고, 광신도들은 여전히 분화구 가장자리를 땅속 무언가를 위한 "
+            "성당처럼 떠받듭니다.",
         .scout_text =
-            "Strong ore and stronger enemies. Anything powerful enough to hold "
-            "a relic fragment would wake here in fire and broken glass.",
-        .npc = "The crater chants to itself.",
+            "강한 광석과 더 강한 적이 있는 곳입니다. 유물 파편을 품을 만큼 강한 존재라면 "
+            "불꽃과 파편 속에서 이곳에서 깨어날 것입니다.",
+        .npc = "분화구가 스스로에게 주문을 외웁니다.",
         .resource = RESOURCE_ORE,
         .danger = 7,
         .safe = false,
@@ -447,16 +441,16 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_RUINED_BASILICA] = {
-        .name = "Ruined Basilica",
-        .short_name = "BASI",
+        .name = "폐허 대성당",
+        .short_name = "성당",
         .description =
-            "A once-golden basilica now stands roofless beneath a dim sky. "
-            "Prayer mosaics survive in fragments, and the nave points like an "
-            "arrow toward the buried throne where the crown wakes.",
+            "한때 황금빛이던 대성당은 이제 지붕 없이 어두운 하늘 아래 서 있습니다. "
+            "기도 모자이크는 파편으로만 남았고, 중앙 회랑은 왕관이 깨어나는 매몰 왕좌를 "
+            "향해 화살처럼 뻗어 있습니다.",
         .scout_text =
-            "The basilica is a threshold. Spirits gather here, and any blessing "
-            "you can wrest from the place may matter before the throne.",
-        .npc = "Echoes recite broken liturgies.",
+            "대성당은 경계선입니다. 영혼들이 이곳에 모이고, 여기서 얻어낼 수 있는 축복은 "
+            "왕좌 앞에서 큰 의미를 가질 수 있습니다.",
+        .npc = "메아리가 부서진 전례문을 읊습니다.",
         .resource = RESOURCE_NONE,
         .danger = 6,
         .safe = false,
@@ -466,15 +460,15 @@ static const ZoneData kZones[ZONE_COUNT] = {
         .archive = false,
     },
     [ZONE_HOLLOW_THRONE] = {
-        .name = "Hollow Throne",
-        .short_name = "THRN",
+        .name = "공허 왕좌",
+        .short_name = "왕좌",
         .description =
-            "The buried palace opens into a cathedral of stone roots and cracked "
-            "marble. At its center sits an empty throne wrapped in shadow, where "
-            "the kingdom's last hunger keeps trying to remember its own name.",
+            "묻힌 궁전은 돌뿌리와 금 간 대리석으로 된 거대한 성소로 이어집니다. 중심엔 "
+            "그림자에 감싼 빈 왕좌가 있고, 왕국의 마지막 굶주림이 자신의 이름을 되찾으려 "
+            "버둥거립니다.",
         .scout_text =
-            "Everything here wants the Dawn Key, your life, or both.",
-        .npc = "Nothing mortal waits here.",
+            "이곳의 모든 것은 여명의 열쇠를, 당신의 목숨을, 혹은 그 둘 모두를 원합니다.",
+        .npc = "이곳엔 필멸의 존재가 기다리지 않습니다.",
         .resource = RESOURCE_NONE,
         .danger = 8,
         .safe = false,
@@ -485,9 +479,9 @@ static const ZoneData kZones[ZONE_COUNT] = {
     },
 };
 static const char *kWeatherNames[WEATHER_COUNT] = {
-    "Clear", "Rain", "Fog", "High Wind", "Ashfall", "Storm"};
+    "맑음", "비", "안개", "강풍", "화산재", "폭풍"};
 static const char *kFragmentNames[FRAGMENT_COUNT] = {
-    "Tidal Fragment", "Frost Fragment", "Ember Fragment"};
+    "조수 파편", "서리 파편", "불씨 파편"};
 static int clamp_int(int value, int min_value, int max_value) {
   if (value < min_value) {
     return min_value;
@@ -585,21 +579,21 @@ static int current_minute(const GameState *game) {
 static const char *time_band(const GameState *game) {
   int hour = current_hour(game);
   if (hour < 5) {
-    return "deep night";
+    return "심야";
   }
   if (hour < 8) {
-    return "dawn";
+    return "새벽";
   }
   if (hour < 12) {
-    return "morning";
+    return "오전";
   }
   if (hour < 17) {
-    return "afternoon";
+    return "오후";
   }
   if (hour < 21) {
-    return "evening";
+    return "저녁";
   }
-  return "late night";
+  return "늦은 밤";
 }
 static bool zone_is_safe(int zone) {
   return kZones[zone].safe;
@@ -637,16 +631,16 @@ static int zone_from_direction(int zone, const char *direction) {
 static void show_exits(int zone) {
   printf("이동 가능:");
   if (zone_north(zone) != ZONE_NONE) {
-    printf(" north");
+    printf(" 북");
   }
   if (zone_east(zone) != ZONE_NONE) {
-    printf(" east");
+    printf(" 동");
   }
   if (zone_south(zone) != ZONE_NONE) {
-    printf(" south");
+    printf(" 남");
   }
   if (zone_west(zone) != ZONE_NONE) {
-    printf(" west");
+    printf(" 서");
   }
   printf("\n");
 }
@@ -677,45 +671,39 @@ static void refresh_rumor(GameState *game) {
   if (!game->bandit_reeve_defeated) {
     fill_rumor(
         game,
-        "Merchants swear the Bandit Reeve has started collecting relic taxes in "
-        "Ironwood Pass.");
+        "상인들 말로는 철목 고개에서 도적 영주가 유물 통행세를 걷기 시작했다.");
     return;
   }
   if (game->fragments_quest == QUEST_ACTIVE &&
       !game->fragment_found[FRAGMENT_TIDAL]) {
     fill_rumor(
         game,
-        "A drowned curator still guards the deepest shelves of the Sunken "
-        "Archive.");
+        "침수 기록고의 가장 깊은 서가를 익사한 관리인이 아직도 지키고 있다.");
     return;
   }
   if (game->fragments_quest == QUEST_ACTIVE &&
       !game->fragment_found[FRAGMENT_FROST]) {
     fill_rumor(
         game,
-        "Frostspire caravans keep vanishing near a shrine buried under fresh "
-        "snow.");
+        "새 눈 아래 묻힌 사당 근처에서 빙첨로 상단이 계속 사라지고 있다.");
     return;
   }
   if (game->fragments_quest == QUEST_ACTIVE &&
       !game->fragment_found[FRAGMENT_EMBER]) {
     fill_rumor(
         game,
-        "Cult embers are circling a glowing chamber somewhere inside the "
-        "Obsidian Crater.");
+        "흑요 분화구 어딘가 빛나는 방 주변을 광신도의 불씨 무리가 배회한다.");
     return;
   }
   if (game->dawn_key_forged && !game->final_boss_defeated) {
     fill_rumor(
         game,
-        "The Ruined Basilica has begun ringing without bells. The throne is "
-        "waking.");
+        "폐허 대성당에서 종 없이 울림이 시작됐다. 왕좌가 깨어난다.");
     return;
   }
   fill_rumor(
       game,
-      "Watch fires are holding for now, but every patrol says the Hollow Throne "
-      "grows louder at night.");
+      "봉화는 아직 버티지만, 모든 순찰대는 밤마다 공허 왕좌의 울림이 커진다고 말한다.");
 }
 static void process_ready_tasks(GameState *game) {
   int safety = 0;
@@ -734,7 +722,7 @@ static void task_weather_shift(void *context) {
     next_weather = (WeatherId)((next_weather + 1) % WEATHER_COUNT);
   }
   game->weather = next_weather;
-  push_event(game, "The weather turns: %s sweeps across the south.",
+  push_event(game, "날씨 변화: %s가 남부를 휩쓸기 시작합니다.",
              kWeatherNames[game->weather]);
 }
 static void task_restock(void *context) {
@@ -744,7 +732,7 @@ static void task_restock(void *context) {
   game->market_potions = 4 + rand() % 4;
   game->port_potions = 3 + rand() % 3;
   game->caravan_zone = caravan_stops[rand() % 3];
-  push_event(game, "Merchants restock their shelves. A caravan camp opens at %s.",
+  push_event(game, "상인들이 물자를 재입고했습니다. 이동 상단이 %s에 야영지를 엽니다.",
              kZones[game->caravan_zone].name);
 }
 static void task_regen(void *context) {
@@ -757,7 +745,7 @@ static void task_regen(void *context) {
     heal += 2;
   }
   game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
-  push_event(game, "%s recovers %d HP while the road briefly quiets.",
+  push_event(game, "%s이(가) 길이 잠시 잠잠해진 틈에 체력 %d를 회복했습니다.",
              game->player.name, heal);
 }
 static void task_doom(void *context) {
@@ -768,17 +756,17 @@ static void task_doom(void *context) {
   game->doom = clamp_int(game->doom + 1, 0, 12);
   if (game->doom >= 9) {
     push_event(game,
-               "The Hollow Crown surges. Enemies across the realm feel sharper, "
-               "hungrier, and less mortal.");
+               "공허의 왕관이 요동칩니다. 전역의 적이 더 날카롭고, 더 굶주리며, 덜 "
+               "필멸적으로 변합니다.");
   } else {
-    push_event(game, "A wave of dread rolls out from the buried palace. Doom is now %d.",
+    push_event(game, "묻힌 궁전에서 공포의 파동이 퍼집니다. 현재 파멸도: %d.",
                game->doom);
   }
 }
 static void task_rumor(void *context) {
   GameState *game = (GameState *)context;
   refresh_rumor(game);
-  push_event(game, "New rumor: %s", game->rumor);
+  push_event(game, "새 소문: %s", game->rumor);
 }
 static bool enqueue_repeating_task(GameState *game, void (*task)(void *),
                                    int start_minutes, int repeat_minutes,
@@ -795,7 +783,7 @@ static bool enqueue_repeating_task(GameState *game, void (*task)(void *),
 }
 static void init_game(GameState *game) {
   memset(game, 0, sizeof(*game));
-  snprintf(game->player.name, sizeof(game->player.name), "Warden");
+  snprintf(game->player.name, sizeof(game->player.name), "수호자");
   game->player.zone = ZONE_EMBERFALL_GATE;
   game->player.level = 1;
   game->player.xp_to_next = 28;
@@ -956,12 +944,15 @@ static void describe_zone(const GameState *game) {
 }
 static void show_help(void) {
   printf("\n명령어:\n");
-  printf("  look, map, stats, inventory, quests, rumor, time\n");
-  printf("  north/south/east/west, go <direction>, travel <direction>\n");
-  printf("  scout, hunt, gather, explore, talk, shop, forge, rest\n");
-  printf("  use potion, save, load, quit\n");
+  printf("  look [둘러보기], map [지도], stats [능력치], inventory [소지품]\n");
+  printf("  quests [퀘스트], rumor [소문], time [시간]\n");
+  printf("  north/south/east/west [이동], go [방향], travel [방향]\n");
+  printf("  scout [정찰], hunt [사냥], gather [채집], explore [탐사]\n");
+  printf("  talk [대화], shop [상점], forge [대장간], rest [휴식]\n");
+  printf("  use potion [포션 사용], save [저장], load [불러오기], quit [종료]\n");
   printf("\n전투 명령어:\n");
-  printf("  attack, cleave, guard, potion, bomb, flee, status\n");
+  printf("  attack [공격], cleave [강공], guard [방어], potion [포션]\n");
+  printf("  bomb [폭탄], flee [도주], status [상태]\n");
 }
 static void show_map(const GameState *game) {
   int row;
@@ -1001,12 +992,12 @@ static void show_inventory(const GameState *game) {
          game->player.potions, game->player.bombs, game->player.herbs,
          game->player.ore, game->player.relic_dust);
   printf("장비: %s, %s, %s\n",
-         game->player.steel_edge ? "Steel Edge" : "Traveler's Blade",
-         game->player.ward_mail ? "Ward Mail" : "Road Leathers",
-         game->player.abbey_sigil ? "Abbey Sigil" : "No Sigil");
+         game->player.steel_edge ? "강철 칼날" : "여행자 검",
+         game->player.ward_mail ? "수호 갑옷" : "가죽 방어구",
+         game->player.abbey_sigil ? "수도원 인장" : "인장 없음");
   if (game->fragment_found[FRAGMENT_TIDAL] || game->fragment_found[FRAGMENT_FROST] ||
       game->fragment_found[FRAGMENT_EMBER]) {
-    printf("Fragments:\n");
+    printf("파편:\n");
     if (game->fragment_found[FRAGMENT_TIDAL]) {
       printf("  %s\n", kFragmentNames[FRAGMENT_TIDAL]);
     }
@@ -1018,7 +1009,7 @@ static void show_inventory(const GameState *game) {
     }
   }
   if (game->dawn_key_forged) {
-    printf("핵심 아이템: Dawn Key\n");
+    printf("핵심 아이템: 여명의 열쇠\n");
   }
 }
 static void show_time(const GameState *game) {
@@ -1029,42 +1020,39 @@ static void show_time(const GameState *game) {
 static void show_quests(const GameState *game) {
   printf("\n퀘스트 기록\n");
   if (game->remedy_quest == QUEST_ACTIVE) {
-    printf("  Sister's Remedy: Bring 3 herbs to Sister Elowen at Verdant Abbey. "
-           "(You have %d)\n",
+    printf("  수녀의 치료제: 청록 수도원의 엘로웬 수녀에게 약초 3개 전달 (%d개 보유)\n",
            game->player.herbs);
   } else if (game->remedy_quest == QUEST_COMPLETE) {
-    printf("  Sister's Remedy: Completed.\n");
+    printf("  수녀의 치료제: 완료\n");
   } else {
-    printf("  Sister's Remedy: Not yet accepted.\n");
+    printf("  수녀의 치료제: 미수락\n");
   }
   if (game->caravan_quest == QUEST_ACTIVE) {
-    printf("  Broken Caravan: Hunt the Bandit Reeve in Ironwood Pass.\n");
+    printf("  부서진 상단: 철목 고개의 도적 영주를 처치\n");
   } else if (game->caravan_quest == QUEST_COMPLETE) {
-    printf("  Broken Caravan: Completed.\n");
+    printf("  부서진 상단: 완료\n");
   } else {
-    printf("  Broken Caravan: Not yet accepted.\n");
+    printf("  부서진 상단: 미수락\n");
   }
   if (game->fragments_quest == QUEST_ACTIVE) {
-    printf("  Dawn Fragments: Recover relics from Sunken Archive, Frostspire "
-           "Trail, and Obsidian Crater.\n");
-    printf("    Sunken Archive: %s\n",
-           game->fragment_found[FRAGMENT_TIDAL] ? "Recovered" : "Missing");
-    printf("    Frostspire Trail: %s\n",
-           game->fragment_found[FRAGMENT_FROST] ? "Recovered" : "Missing");
-    printf("    Obsidian Crater: %s\n",
-           game->fragment_found[FRAGMENT_EMBER] ? "Recovered" : "Missing");
+    printf("  여명의 파편: 침수 기록고·빙첨로·흑요 분화구에서 파편 회수\n");
+    printf("    침수 기록고: %s\n",
+           game->fragment_found[FRAGMENT_TIDAL] ? "회수됨" : "미회수");
+    printf("    빙첨로: %s\n",
+           game->fragment_found[FRAGMENT_FROST] ? "회수됨" : "미회수");
+    printf("    흑요 분화구: %s\n",
+           game->fragment_found[FRAGMENT_EMBER] ? "회수됨" : "미회수");
   } else if (game->fragments_quest == QUEST_COMPLETE) {
-    printf("  Dawn Fragments: Completed.\n");
+    printf("  여명의 파편: 완료\n");
   } else {
-    printf("  Dawn Fragments: Locked.\n");
+    printf("  여명의 파편: 잠김\n");
   }
   if (game->crown_quest == QUEST_ACTIVE) {
-    printf("  Hollow Crown: Carry the Dawn Key through the Ruined Basilica and "
-           "end the throne's hunger.\n");
+    printf("  공허의 왕관: 여명의 열쇠를 들고 폐허 대성당을 넘어 왕좌의 갈증을 끝낼 것\n");
   } else if (game->crown_quest == QUEST_COMPLETE) {
-    printf("  Hollow Crown: Completed.\n");
+    printf("  공허의 왕관: 완료\n");
   } else {
-    printf("  Hollow Crown: Locked.\n");
+    printf("  공허의 왕관: 잠김\n");
   }
 }
 static bool read_command(const char *prompt, char *buffer, size_t buffer_size) {
@@ -1087,7 +1075,7 @@ static void grant_xp(GameState *game, int amount) {
     game->player.strength += 2;
     game->player.guard += 1;
     push_event(game,
-               "%s rises to level %d. Max HP, attack, and defense all climb.",
+               "%s이(가) 레벨 %d에 도달했습니다. 최대 체력, 공격력, 방어력이 상승합니다.",
                game->player.name, game->player.level);
   }
 }
@@ -1130,156 +1118,153 @@ static Enemy build_regular_enemy(GameState *game, int zone) {
   case ZONE_IRONWOOD_PASS:
     if (game->caravan_quest == QUEST_ACTIVE && !game->bandit_reeve_defeated) {
       enemy = make_enemy(
-          "Bandit Reeve", 38, 8, 4, 22, 28, 3, ENEMY_ROLE_BOSS, true, true,
+          "도적 영주", 38, 8, 4, 22, 28, 3, ENEMY_ROLE_BOSS, true, true,
           false,
-          "A scarred raider captain steps onto the road with a ledger tucked "
-          "under one arm and a hooked saber in the other.",
-          "The Reeve snaps a signal whistle and dives forward in a ruthless "
-          "chain of cuts.");
+          "상처투성이 약탈대장이 한쪽 팔엔 장부를, 다른 손엔 갈고리 검을 쥐고 길 위로 "
+          "내려섭니다.",
+          "도적 영주가 신호 호루라기를 불고 무자비한 연격으로 파고듭니다.");
       scale_enemy(game, &enemy, 3);
       return enemy;
     }
     if (roll < 50) {
       enemy = make_enemy(
-          "Rust Wolf", 22, 6, 2, 10, 8, 1, ENEMY_ROLE_SKIRMISHER, false, false,
+          "녹빛 늑대", 22, 6, 2, 10, 8, 1, ENEMY_ROLE_SKIRMISHER, false, false,
           false,
-          "A rust-furred wolf slips between the ironwood trunks, circling low.",
-          "The wolf lunges for the throat.");
+          "녹슨 털빛 늑대가 철목 사이를 미끄러지듯 돌며 낮게 몸을 깝니다.",
+          "늑대가 목을 향해 뛰어듭니다.");
     } else {
       enemy = make_enemy(
-          "Toll Bandit", 26, 7, 3, 11, 11, 2, ENEMY_ROLE_SKIRMISHER, false,
+          "통행 도적", 26, 7, 3, 11, 11, 2, ENEMY_ROLE_SKIRMISHER, false,
           true, false,
-          "A road bandit drops from the rocks and levels a sawed spear at you.",
-          "The bandit darts in with a stabbing rush.");
+          "길목 도적이 바위 위에서 내려와 톱날 창끝을 겨눕니다.",
+          "도적이 찌르기 돌진으로 파고듭니다.");
     }
     break;
   case ZONE_MOONFEN:
     if (roll < 50) {
       enemy = make_enemy(
-          "Fen Leech", 24, 7, 2, 12, 9, 2, ENEMY_ROLE_BRUTE, false, false,
+          "늪 거머리", 24, 7, 2, 12, 9, 2, ENEMY_ROLE_BRUTE, false, false,
           false,
-          "The water bulges. A giant leech peels itself from the mud.",
-          "The leech crushes forward in a wet, heavy slam.");
+          "수면이 부풀어 오릅니다. 거대한 거머리가 진흙에서 몸을 떼어냅니다.",
+          "거머리가 젖은 무게로 짓눌러 밀고 들어옵니다.");
     } else {
       enemy = make_enemy(
-          "Mire Witch", 21, 7, 2, 13, 12, 2, ENEMY_ROLE_CASTER, false, false,
+          "늪 마녀", 21, 7, 2, 13, 12, 2, ENEMY_ROLE_CASTER, false, false,
           true,
-          "A mire witch rises on roots and reeds, muttering to the water.",
-          "The witch spits a curse that numbs your limbs.");
+          "늪 마녀가 뿌리와 갈대 위로 떠오르며 물에게 중얼거립니다.",
+          "마녀가 팔다리를 마비시키는 저주를 내뱉습니다.");
     }
     break;
   case ZONE_STORMWATCH_CLIFFS:
     if (roll < 50) {
       enemy = make_enemy(
-          "Cliff Harrier", 26, 8, 3, 14, 11, 2, ENEMY_ROLE_SKIRMISHER, false,
+          "절벽 약탈자", 26, 8, 3, 14, 11, 2, ENEMY_ROLE_SKIRMISHER, false,
           false, false,
-          "A harrier vaults from a ledge, blades flashing in the sea spray.",
-          "The raider uses the wind to accelerate a vicious strike.");
+          "약탈자가 바위턱에서 뛰어내리며 칼날을 번뜩입니다.",
+          "약탈자가 바람을 타고 잔혹한 일격을 가속합니다.");
     } else {
       enemy = make_enemy(
-          "Gale Marauder", 30, 8, 4, 15, 13, 3, ENEMY_ROLE_SKIRMISHER, false,
+          "질풍 약탈자", 30, 8, 4, 15, 13, 3, ENEMY_ROLE_SKIRMISHER, false,
           true, false,
-          "A marauder wrapped in sailcloth grins from beneath a storm mask.",
-          "The marauder hooks your guard aside and drives in hard.");
+          "돛천을 두른 약탈자가 폭풍 가면 아래서 웃습니다.",
+          "약탈자가 당신의 방어를 걷어내고 강하게 파고듭니다.");
     }
     break;
   case ZONE_ASHEN_QUARRY:
     if (roll < 50) {
       enemy = make_enemy(
-          "Quarry Ghoul", 28, 8, 4, 15, 12, 2, ENEMY_ROLE_BRUTE, false, false,
+          "채석장 구울", 28, 8, 4, 15, 12, 2, ENEMY_ROLE_BRUTE, false, false,
           false,
-          "A quarry corpse drags itself from an ore seam, jaw full of slag.",
-          "The ghoul hammers downward with mining claws.");
+          "광맥 틈에서 채석장 시체가 슬래그를 물고 기어 나옵니다.",
+          "구울이 채굴 발톱을 내리찍습니다.");
     } else {
       enemy = make_enemy(
-          "Slag Brute", 33, 9, 5, 17, 15, 3, ENEMY_ROLE_BRUTE, false, false,
+          "슬래그 괴수", 33, 9, 5, 17, 15, 3, ENEMY_ROLE_BRUTE, false, false,
           false,
-          "A slag brute tears free from a collapsed smelter with molten eyes.",
-          "The brute shoulders into you like a charging furnace.");
+          "슬래그 괴수가 무너진 제련로에서 용해된 눈빛으로 튀어나옵니다.",
+          "괴수가 돌진하는 용광로처럼 어깨를 들이받습니다.");
     }
     break;
   case ZONE_SUNKEN_ARCHIVE:
     if (roll < 50) {
       enemy = make_enemy(
-          "Drowned Scribe", 30, 9, 4, 17, 16, 3, ENEMY_ROLE_CASTER, false,
+          "익사한 서기관", 30, 9, 4, 17, 16, 3, ENEMY_ROLE_CASTER, false,
           false, true,
-          "A drowned scribe climbs the stairs, quills still pinned through its "
-          "palms.",
-          "The scribe traces a freezing glyph through the water around you.");
+          "깃펜이 손바닥을 관통한 익사한 서기관이 계단을 올라옵니다.",
+          "서기관이 주변 물결에 얼어붙는 문양을 그립니다.");
     } else {
       enemy = make_enemy(
-          "Saltbound Curator", 34, 10, 5, 18, 17, 3, ENEMY_ROLE_CASTER, false,
+          "염수 속박 큐레이터", 34, 10, 5, 18, 17, 3, ENEMY_ROLE_CASTER, false,
           false, true,
-          "A curator draped in algae and chains rises from the collapsed stacks.",
-          "The curator speaks a catalog curse that blurs your focus.");
+          "해초와 쇠사슬을 두른 큐레이터가 무너진 서가 사이에서 떠오릅니다.",
+          "큐레이터가 집중을 흐리는 목록 저주를 읊습니다.");
     }
     break;
   case ZONE_FROSTSPIRE_TRAIL:
     if (roll < 50) {
       enemy = make_enemy(
-          "Ice Hound", 32, 10, 4, 18, 15, 3, ENEMY_ROLE_SKIRMISHER, false,
+          "빙설 사냥개", 32, 10, 4, 18, 15, 3, ENEMY_ROLE_SKIRMISHER, false,
           false, false,
-          "Snow erupts and an ice hound streaks across the trail toward you.",
-          "The hound springs with a frost-rimed bite.");
+          "눈보라가 터지며 빙설 사냥개가 길을 가로질러 달려듭니다.",
+          "사냥개가 서리 낀 이빨로 뛰어듭니다.");
     } else {
       enemy = make_enemy(
-          "Frost Revenant", 36, 10, 5, 19, 18, 3, ENEMY_ROLE_CASTER, false,
+          "서리 망령", 36, 10, 5, 19, 18, 3, ENEMY_ROLE_CASTER, false,
           false, true,
-          "A revenant in caravan chains emerges from the blowing snow.",
-          "The revenant exhales a shard-laced gale into your face.");
+          "상단 사슬을 감은 망령이 눈보라 속에서 모습을 드러냅니다.",
+          "망령이 파편 섞인 한기를 내뿜습니다.");
     }
     break;
   case ZONE_CINDER_GROVE:
     if (roll < 50) {
       enemy = make_enemy(
-          "Ember Stag", 31, 10, 4, 18, 16, 3, ENEMY_ROLE_BRUTE, false, false,
+          "불사슴", 31, 10, 4, 18, 16, 3, ENEMY_ROLE_BRUTE, false, false,
           false,
-          "An ember stag lowers a rack of burning antlers and paws sparks into "
-          "the ash.",
-          "The stag charges, trailing a ribbon of fire.");
+          "불사슴이 타오르는 뿔을 낮추고 재 위에 불꽃을 튑니다.",
+          "불사슴이 불길을 끌며 돌진합니다.");
     } else {
       enemy = make_enemy(
-          "Thornhexer", 29, 10, 4, 18, 17, 3, ENEMY_ROLE_CASTER, false, false,
+          "가시주술사", 29, 10, 4, 18, 17, 3, ENEMY_ROLE_CASTER, false, false,
           true,
-          "A thornhexer steps out from the smoke wrapped in living briars.",
-          "The hexer hurls barbed smoke that deadens your swing.");
+          "살아 있는 가시에 휘감긴 주술사가 연기 속에서 걸어 나옵니다.",
+          "주술사가 베기를 둔화시키는 가시 연기를 던집니다.");
     }
     break;
   case ZONE_OBSIDIAN_CRATER:
     if (roll < 50) {
       enemy = make_enemy(
-          "Glass Drake", 38, 11, 5, 22, 20, 4, ENEMY_ROLE_BRUTE, false, false,
+          "유리 드레이크", 38, 11, 5, 22, 20, 4, ENEMY_ROLE_BRUTE, false, false,
           false,
-          "A glass drake climbs over the crater rim, shedding shards as it moves.",
-          "The drake slams forward on molten talons.");
+          "유리 드레이크가 분화구 가장자리를 넘어오며 파편을 흩뿌립니다.",
+          "드레이크가 용암 발톱으로 전진하며 내리칩니다.");
     } else {
       enemy = make_enemy(
-          "Cinder Cultist", 34, 11, 5, 22, 21, 4, ENEMY_ROLE_CASTER, false,
+          "불씨 광신도", 34, 11, 5, 22, 21, 4, ENEMY_ROLE_CASTER, false,
           false, true,
-          "A cinder cultist emerges from the vapor with a mask of black glass.",
-          "The cultist spits a hymn of flame that shakes your stance.");
+          "검은 유리 가면을 쓴 광신도가 증기 속에서 모습을 드러냅니다.",
+          "광신도가 자세를 흔드는 화염 찬가를 뿜어냅니다.");
     }
     break;
   case ZONE_RUINED_BASILICA:
     if (roll < 50) {
       enemy = make_enemy(
-          "Oathbound Shade", 36, 11, 5, 22, 19, 4, ENEMY_ROLE_SKIRMISHER, false,
+          "서약의 그림자", 36, 11, 5, 22, 19, 4, ENEMY_ROLE_SKIRMISHER, false,
           false, false,
-          "An oathbound shade steps from a shattered mosaic with sword drawn.",
-          "The shade glides through your guard in a silver arc.");
+          "서약의 그림자가 깨진 모자이크 위에서 검을 뽑아 듭니다.",
+          "그림자가 은빛 궤적을 그리며 방어를 가릅니다.");
     } else {
       enemy = make_enemy(
-          "Choir Wraith", 35, 11, 5, 22, 20, 4, ENEMY_ROLE_CASTER, false, false,
+          "합창 망령", 35, 11, 5, 22, 20, 4, ENEMY_ROLE_CASTER, false, false,
           true,
-          "A choir wraith descends from the nave, singing through a split jaw.",
-          "The wraith's note cuts straight into your concentration.");
+          "갈라진 턱으로 노래하는 합창 망령이 중앙 회랑에서 내려옵니다.",
+          "망령의 음이 집중을 곧게 베어냅니다.");
     }
     break;
   default:
     enemy = make_enemy(
-        "Road Lurker", 20, 6, 2, 8, 7, 1, ENEMY_ROLE_SKIRMISHER, false, false,
-        false, "A scavenger emerges from the roadside shadows.",
-        "The lurker darts in with a fast slash.");
+        "길목 잠복자", 20, 6, 2, 8, 7, 1, ENEMY_ROLE_SKIRMISHER, false, false,
+        false, "길가 그림자에서 수색자가 모습을 드러냅니다.",
+        "잠복자가 빠른 베기로 파고듭니다.");
     break;
   }
   scale_enemy(game, &enemy, kZones[zone].danger);
@@ -1290,32 +1275,31 @@ static Enemy build_fragment_guardian(GameState *game, FragmentId fragment) {
   switch (fragment) {
   case FRAGMENT_TIDAL:
     enemy = make_enemy(
-        "Drowned Curator", 44, 12, 6, 28, 28, 4, ENEMY_ROLE_BOSS, true, false,
+        "익사한 큐레이터", 44, 12, 6, 28, 28, 4, ENEMY_ROLE_BOSS, true, false,
         true,
-        "The curator vault door groans open and a towering drowned keeper rises "
-        "with chains of brass keys wrapped around both arms.",
-        "The curator floods the chamber with a cold archival curse.");
+        "큐레이터 금고 문이 신음하며 열리고, 황동 열쇠 사슬을 양팔에 감은 거대한 "
+        "익사한 수호자가 일어섭니다.",
+        "큐레이터가 방 전체에 차가운 기록 저주를 퍼뜨립니다.");
     break;
   case FRAGMENT_FROST:
     enemy = make_enemy(
-        "Rime Colossus", 48, 13, 7, 30, 30, 4, ENEMY_ROLE_BOSS, true, false,
+        "서리 거상", 48, 13, 7, 30, 30, 4, ENEMY_ROLE_BOSS, true, false,
         false,
-        "A colossal knight of ice and broken caravan wood tears free from the "
-        "mountain shrine.",
-        "The colossus lifts both arms and brings the whole mountain down.");
+        "얼음과 부서진 상단 목재로 이루어진 거대한 기사가 산 사당에서 몸을 찢고 나옵니다.",
+        "거상이 양팔을 들어 산 전체를 무너뜨릴 듯 내리칩니다.");
     break;
   case FRAGMENT_EMBER:
     enemy = make_enemy(
-        "Glass Wyrm", 52, 14, 7, 34, 34, 5, ENEMY_ROLE_BOSS, true, false, true,
-        "Lava tears open the crater floor and a wyrm of black glass coils into "
-        "the air, carrying an ember shard in its burning throat.",
-        "The wyrm screams and the crater answers with a wave of heat.");
+        "유리 웜", 52, 14, 7, 34, 34, 5, ENEMY_ROLE_BOSS, true, false, true,
+        "용암이 분화구 바닥을 가르고, 타오르는 목 안에 불씨 파편을 품은 검은 유리 웜이 "
+        "허공으로 솟아오릅니다.",
+        "웜이 비명을 지르자 분화구가 열파로 응답합니다.");
     break;
   default:
     enemy = make_enemy(
-        "Relic Guardian", 40, 11, 5, 24, 24, 3, ENEMY_ROLE_BOSS, true, false,
-        false, "A relic guardian steps from hiding.",
-        "The guardian attacks with sudden force.");
+        "유물 수호자", 40, 11, 5, 24, 24, 3, ENEMY_ROLE_BOSS, true, false,
+        false, "유물 수호자가 은신처에서 걸어 나옵니다.",
+        "수호자가 돌발적으로 강습합니다.");
     break;
   }
   scale_enemy(game, &enemy, 4);
@@ -1323,13 +1307,11 @@ static Enemy build_fragment_guardian(GameState *game, FragmentId fragment) {
 }
 static Enemy build_final_boss(GameState *game) {
   Enemy boss =
-      make_enemy("King Without Dawn", 78, 16, 8, 80, 0, 6, ENEMY_ROLE_BOSS,
+      make_enemy("여명 없는 왕", 78, 16, 8, 80, 0, 6, ENEMY_ROLE_BOSS,
                  true, false, true,
-                 "The shadow on the throne stands. A king-shaped absence unfolds "
-                 "into armor, antlers, and a crown made from everyone it ever "
-                 "failed to save.",
-                 "The dead king lifts the Hollow Crown and the entire chamber "
-                 "leans toward you.");
+                 "왕좌 위의 그림자가 일어섭니다. 왕의 형상을 한 공허가 갑옷과 뿔, "
+                 "그리고 끝내 구하지 못한 모든 이로 만든 왕관으로 펼쳐집니다.",
+                 "죽은 왕이 공허의 왕관을 들어 올리자 방 전체가 당신 쪽으로 기울어집니다.");
   scale_enemy(game, &boss, 5);
   if (game->basilica_blessing) {
     boss.max_hp -= 6;
@@ -1350,18 +1332,18 @@ static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone
   if (zone == ZONE_MOONFEN || zone == ZONE_CINDER_GROVE) {
     if (rand() % 100 < 35) {
       game->player.herbs++;
-      printf("You recover a usable herb bundle from the aftermath.\n");
+      printf("전투의 여파 속에서 쓸 만한 약초 묶음을 찾아냈습니다.\n");
     }
   } else if (zone == ZONE_IRONWOOD_PASS || zone == ZONE_ASHEN_QUARRY ||
              zone == ZONE_OBSIDIAN_CRATER) {
     if (rand() % 100 < 35) {
       game->player.ore++;
-      printf("You pry a chunk of workable ore from the battlefield.\n");
+      printf("전장에서 가공 가능한 광석 덩이를 떼어냈습니다.\n");
     }
   } else if (zone == ZONE_SUNKEN_ARCHIVE || zone == ZONE_RUINED_BASILICA) {
     if (rand() % 100 < 25) {
       game->player.relic_dust++;
-      printf("You collect shimmering relic dust from the ruins.\n");
+      printf("폐허에서 반짝이는 유물 가루를 모았습니다.\n");
     }
   }
   if (game->weather == WEATHER_CLEAR) {
@@ -1370,7 +1352,7 @@ static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone
   if (bonus_gold > 0) {
     game->player.gold += bonus_gold;
   }
-  printf("Rewards: %d XP, %d gold.\n", enemy->xp_reward,
+  printf("보상: 경험치 %d, 골드 %d.\n", enemy->xp_reward,
          enemy->gold_reward + bonus_gold);
 }
 static BattleResult run_battle(GameState *game, Enemy enemy) {
@@ -1389,7 +1371,7 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
     printf("\n%s HP %d/%d | %s HP %d/%d\n", game->player.name, game->player.hp,
            game->player.max_hp, game->combat.enemy.name, game->combat.enemy.hp,
            game->combat.enemy.max_hp);
-    if (!read_command("Combat> ", input, sizeof(input))) {
+    if (!read_command("전투> ", input, sizeof(input))) {
       game->running = false;
       game->combat.active = false;
       return BATTLE_RESULT_DEFEAT;
@@ -1399,53 +1381,51 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
       continue;
     }
     if (strcmp(command, "help") == 0) {
-      printf("Combat commands: attack, cleave, guard, potion, bomb, flee, "
-             "status\n");
+      printf("전투 명령어: attack, cleave, guard, potion, bomb, flee, status\n");
       continue;
     }
     if (strcmp(command, "status") == 0) {
-      printf("You are %s.\n",
-             game->combat.weaken_turns > 0 ? "weakened by hostile magic"
-                                           : "holding steady");
+      printf("현재 상태: %s\n",
+             game->combat.weaken_turns > 0 ? "적 마법으로 약화됨" : "안정적");
       continue;
     }
     if (strcmp(command, "potion") == 0 ||
         strcmp(command, "use potion") == 0) {
       if (game->player.potions <= 0) {
-        printf("You are out of potions.\n");
+        printf("포션이 없습니다.\n");
         continue;
       }
       game->player.potions--;
       game->player.hp =
           clamp_int(game->player.hp + 18 + game->player.level * 2, 0,
                     game->player.max_hp);
-      printf("You drink a potion and steady yourself.\n");
+      printf("포션을 마시고 자세를 가다듬습니다.\n");
       spend_turn = true;
     } else if (strcmp(command, "bomb") == 0) {
       if (game->player.bombs <= 0) {
-        printf("You have no bombs left.\n");
+        printf("폭탄이 남아 있지 않습니다.\n");
         continue;
       }
       game->player.bombs--;
       player_damage = 14 + game->player.level * 3;
       game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - player_damage, 0,
                                         game->combat.enemy.max_hp);
-      printf("Your bomb detonates for %d damage.\n", player_damage);
+      printf("폭탄이 폭발해 %d 피해를 입혔습니다.\n", player_damage);
       spend_turn = true;
     } else if (strcmp(command, "guard") == 0) {
       game->combat.guard_active = true;
       if (game->player.abbey_sigil) {
         game->player.hp =
             clamp_int(game->player.hp + 2, 0, game->player.max_hp);
-        printf("You brace behind your weapon and the abbey sigil flares.\n");
+        printf("무기를 세워 자세를 잡자 수도원 인장이 빛납니다.\n");
       } else {
-        printf("You brace for the next strike.\n");
+        printf("다음 공격에 대비해 방어 태세를 취합니다.\n");
       }
       spend_turn = true;
     } else if (strcmp(command, "cleave") == 0) {
       int attack = player_attack_value(game) + 6;
       if (game->player.level < 3) {
-        printf("You have not yet learned how to commit to a full cleave.\n");
+        printf("아직 전력 가르기를 익히지 못했습니다.\n");
         continue;
       }
       if (game->combat.weaken_turns > 0) {
@@ -1454,11 +1434,11 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
       player_damage = compute_damage(attack, game->combat.enemy.defense);
       if (rand() % 100 < 20) {
         player_damage += 4 + game->player.level;
-        printf("The cleave lands perfectly.\n");
+        printf("가르기가 완벽하게 적중했습니다.\n");
       }
       game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - player_damage, 0,
                                         game->combat.enemy.max_hp);
-      printf("You cleave %s for %d damage.\n", game->combat.enemy.name,
+      printf("%s에게 가르기 피해 %d를 입혔습니다.\n", game->combat.enemy.name,
              player_damage);
       spend_turn = true;
     } else if (strcmp(command, "attack") == 0) {
@@ -1469,17 +1449,17 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
       player_damage = compute_damage(attack, game->combat.enemy.defense);
       if (rand() % 100 < 12) {
         player_damage += 3 + game->player.level;
-        printf("Critical hit.\n");
+        printf("치명타!\n");
       }
       game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - player_damage, 0,
                                         game->combat.enemy.max_hp);
-      printf("You hit %s for %d damage.\n", game->combat.enemy.name,
+      printf("%s에게 %d 피해를 입혔습니다.\n", game->combat.enemy.name,
              player_damage);
       spend_turn = true;
     } else if (strcmp(command, "flee") == 0) {
       int flee_chance;
       if (game->combat.enemy.boss) {
-        printf("There is nowhere to run from this fight.\n");
+        printf("이 전투에서는 도망칠 수 없습니다.\n");
         continue;
       }
       flee_chance = 45 + game->player.level * 5 - kZones[game->player.zone].danger * 3;
@@ -1487,17 +1467,17 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
         flee_chance += 10;
       }
       if (rand() % 100 < flee_chance) {
-        printf("You break away and escape.\n");
+        printf("틈을 만들어 탈출했습니다.\n");
         advance_time(game, 10);
         flush_events(game);
         game->combat.active = false;
         return BATTLE_RESULT_FLED;
       }
-      printf("You try to disengage, but %s cuts you off.\n",
+      printf("이탈을 시도했지만 %s이(가) 길을 막습니다.\n",
              game->combat.enemy.name);
       spend_turn = true;
     } else {
-      printf("That command does not work in combat.\n");
+      printf("그 명령어는 전투 중 사용할 수 없습니다.\n");
       continue;
     }
     if (!spend_turn) {
@@ -1513,7 +1493,7 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
       game->combat.enemy_charging = false;
     } else if (game->combat.enemy.boss && rand() % 100 < 20) {
       game->combat.enemy_charging = true;
-      printf("%s gathers itself for a crushing follow-up.\n",
+      printf("%s이(가) 강타 연계를 준비합니다.\n",
              game->combat.enemy.name);
       enemy_damage = 0;
     } else if (game->combat.enemy.inflicts_weakness && rand() % 100 < 25) {
@@ -1527,27 +1507,27 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
       enemy_damage =
           compute_damage(game->combat.enemy.attack, player_defense_value(game));
       game->player.gold -= stolen;
-      printf("%s slashes past your guard and steals %d gold.\n",
+      printf("%s이(가) 방어를 뚫고 골드 %d를 훔쳤습니다.\n",
              game->combat.enemy.name, stolen);
     } else {
       enemy_damage =
           compute_damage(game->combat.enemy.attack, player_defense_value(game));
       if (game->combat.enemy.role == ENEMY_ROLE_BRUTE) {
-        printf("%s crashes into you with brute force.\n", game->combat.enemy.name);
+        printf("%s이(가) 압도적인 힘으로 들이받습니다.\n", game->combat.enemy.name);
       } else if (game->combat.enemy.role == ENEMY_ROLE_CASTER) {
-        printf("%s lashes out with spiteful magic.\n", game->combat.enemy.name);
+        printf("%s이(가) 악의적인 마법을 퍼붓습니다.\n", game->combat.enemy.name);
       } else {
-        printf("%s strikes fast.\n", game->combat.enemy.name);
+        printf("%s이(가) 재빠르게 공격합니다.\n", game->combat.enemy.name);
       }
     }
     if (game->combat.guard_active) {
       enemy_damage = (enemy_damage + 1) / 2;
-      printf("Your guard absorbs part of the blow.\n");
+      printf("방어로 피해 일부를 흡수했습니다.\n");
     }
     if (enemy_damage > 0) {
       game->player.hp = clamp_int(game->player.hp - enemy_damage, 0,
                                   game->player.max_hp);
-      printf("You take %d damage.\n", enemy_damage);
+      printf("%d 피해를 받았습니다.\n", enemy_damage);
     }
     game->combat.guard_active = false;
     if (game->combat.weaken_turns > 0) {
@@ -1558,27 +1538,27 @@ static BattleResult run_battle(GameState *game, Enemy enemy) {
   }
   game->combat.active = false;
   if (game->player.hp <= 0) {
-    printf("\n%s falls, and the road goes dark.\n", game->player.name);
+    printf("\n%s이(가) 쓰러지고 길은 어둠에 잠깁니다.\n", game->player.name);
     game->running = false;
     return BATTLE_RESULT_DEFEAT;
   }
-  printf("\n%s falls.\n", game->combat.enemy.name);
+  printf("\n%s이(가) 쓰러졌습니다.\n", game->combat.enemy.name);
   award_post_battle_loot(game, &game->combat.enemy, game->player.zone);
   return BATTLE_RESULT_VICTORY;
 }
 static void use_potion_outside_combat(GameState *game) {
   if (game->player.potions <= 0) {
-    printf("You do not have any potions.\n");
+    printf("포션이 없습니다.\n");
     return;
   }
   if (game->player.hp >= game->player.max_hp) {
-    printf("You are already at full health.\n");
+    printf("이미 체력이 가득합니다.\n");
     return;
   }
   game->player.potions--;
   game->player.hp = clamp_int(game->player.hp + 18 + game->player.level * 2, 0,
                               game->player.max_hp);
-  printf("You drink a potion and recover to %d/%d HP.\n", game->player.hp,
+  printf("포션을 마셔 체력을 %d/%d로 회복했습니다.\n", game->player.hp,
          game->player.max_hp);
   advance_time(game, 10);
   flush_events(game);
@@ -1590,24 +1570,24 @@ static void handle_bandit_boss_victory(GameState *game) {
   game->player.relic_dust += 1;
   if (!game->player.steel_edge && game->player.ore >= 4) {
     push_event(game,
-               "The recovered ledger identifies hidden ore caches in the south.");
+               "회수한 장부에서 남부의 숨겨진 광석 저장 위치를 확인했습니다.");
   }
   refresh_rumor(game);
-  printf("You recover the broken caravan ledger and scatter the pass gang. "
-         "Merchants across the realm breathe easier.\n");
+  printf("부서진 상단 장부를 회수하고 고개의 도적 무리를 흩어놓았습니다. 상인들이 한숨 "
+         "돌립니다.\n");
 }
 static void handle_fragment_victory(GameState *game, FragmentId fragment) {
   game->fragment_found[fragment] = true;
   game->player.relic_dust += 2;
   game->doom = clamp_int(game->doom - 1, 0, 12);
   refresh_rumor(game);
-  printf("You secure the %s.\n", kFragmentNames[fragment]);
+  printf("%s을(를) 확보했습니다.\n", kFragmentNames[fragment]);
 }
 static void hunt_current_zone(GameState *game) {
   Enemy enemy;
   BattleResult result;
   if (kZones[game->player.zone].safe || kZones[game->player.zone].danger <= 0) {
-    printf("This area is too secure for open hunting.\n");
+    printf("이 구역은 너무 안전해 사냥 대상을 찾기 어렵습니다.\n");
     return;
   }
   advance_time(game, 20);
@@ -1617,7 +1597,7 @@ static void hunt_current_zone(GameState *game) {
   if (result != BATTLE_RESULT_VICTORY) {
     return;
   }
-  if (strcmp(enemy.name, "Bandit Reeve") == 0) {
+  if (strcmp(enemy.name, "도적 영주") == 0) {
     handle_bandit_boss_victory(game);
   }
 }
@@ -1625,14 +1605,14 @@ static void scout_zone(GameState *game) {
   const ZoneData *zone = &kZones[game->player.zone];
   printf("%s\n", zone->scout_text);
   if (!zone->safe && zone->danger > 0) {
-    printf("You judge the effective danger here at roughly %d.\n",
+    printf("체감 위험도는 대략 %d 정도입니다.\n",
            zone->danger + game->doom / 3);
   }
   if (zone_has_merchant(game, game->player.zone)) {
-    printf("Trade is available here.\n");
+    printf("이곳에서는 거래가 가능합니다.\n");
   }
   if (game->player.zone == ZONE_HOLLOW_THRONE && game->dawn_key_forged) {
-    printf("The throne is awake. There will be no soft entrance.\n");
+    printf("왕좌가 깨어 있습니다. 무혈 입장은 불가능합니다.\n");
   }
   advance_time(game, 10);
   flush_events(game);
@@ -1641,7 +1621,7 @@ static void gather_resources(GameState *game) {
   const ZoneData *zone = &kZones[game->player.zone];
   int amount = 1;
   if (zone->resource == RESOURCE_NONE) {
-    printf("There is nothing obvious to gather here.\n");
+    printf("이곳에서는 채집할 만한 것이 보이지 않습니다.\n");
     return;
   }
   if (game->weather == WEATHER_CLEAR || game->weather == WEATHER_RAIN) {
@@ -1649,15 +1629,15 @@ static void gather_resources(GameState *game) {
   }
   if (zone->resource == RESOURCE_HERB) {
     game->player.herbs += amount;
-    printf("You gather %d herb bundle%s.\n", amount, amount == 1 ? "" : "s");
+    printf("약초 묶음 %d개를 채집했습니다.\n", amount);
   } else if (zone->resource == RESOURCE_ORE) {
     game->player.ore += amount;
-    printf("You haul away %d ore chunk%s.\n", amount, amount == 1 ? "" : "s");
+    printf("광석 덩이 %d개를 채굴했습니다.\n", amount);
   }
   advance_time(game, 35);
   flush_events(game);
   if (!zone->safe && rand() % 100 < 30) {
-    printf("Your work draws unwanted attention.\n");
+    printf("채집 소음이 불청객의 관심을 끌었습니다.\n");
     hunt_current_zone(game);
   }
 }
@@ -1666,19 +1646,18 @@ static void explore_special_location(GameState *game) {
   switch (game->player.zone) {
   case ZONE_SUNKEN_ARCHIVE:
     if (game->fragments_quest != QUEST_ACTIVE) {
-      printf("You search the archive but without the archivist's notes the "
-             "deep vaults remain impossible to read.\n");
+      printf("기록고를 뒤졌지만 기록관의 메모 없이는 심층 금고를 해독할 수 없습니다.\n");
       advance_time(game, 25);
       flush_events(game);
       return;
     }
     if (game->fragment_found[FRAGMENT_TIDAL]) {
-      printf("The curator vault lies open and empty now.\n");
+      printf("큐레이터 금고는 이미 열려 있고 비어 있습니다.\n");
       advance_time(game, 20);
       flush_events(game);
       return;
     }
-    printf("You dive below the collapsed stacks and force open the curator vault.\n");
+    printf("무너진 서가 아래로 잠수해 큐레이터 금고를 강제로 엽니다.\n");
     advance_time(game, 25);
     flush_events(game);
     result = run_battle(game, build_fragment_guardian(game, FRAGMENT_TIDAL));
@@ -1688,19 +1667,18 @@ static void explore_special_location(GameState *game) {
     return;
   case ZONE_FROSTSPIRE_TRAIL:
     if (game->fragments_quest != QUEST_ACTIVE) {
-      printf("Without the library's route notes, the ice shrines all look the "
-             "same through the storm.\n");
+      printf("도서관 경로 메모가 없으면 폭풍 속 얼음 사당은 전부 똑같이 보입니다.\n");
       advance_time(game, 25);
       flush_events(game);
       return;
     }
     if (game->fragment_found[FRAGMENT_FROST]) {
-      printf("The frozen shrine has already yielded its relic.\n");
+      printf("얼어붙은 사당에서는 이미 유물이 회수되었습니다.\n");
       advance_time(game, 20);
       flush_events(game);
       return;
     }
-    printf("You follow a half-buried processional path toward a frozen shrine.\n");
+    printf("반쯤 묻힌 행렬 길을 따라 얼어붙은 사당으로 향합니다.\n");
     advance_time(game, 25);
     flush_events(game);
     result = run_battle(game, build_fragment_guardian(game, FRAGMENT_FROST));
@@ -1710,18 +1688,18 @@ static void explore_special_location(GameState *game) {
     return;
   case ZONE_OBSIDIAN_CRATER:
     if (game->fragments_quest != QUEST_ACTIVE) {
-      printf("The crater's vents force you back before you can safely descend.\n");
+      printf("분화구 분기공이 안전 하강 전에 당신을 밀어냅니다.\n");
       advance_time(game, 20);
       flush_events(game);
       return;
     }
     if (game->fragment_found[FRAGMENT_EMBER]) {
-      printf("The chamber where the wyrm nested has gone quiet.\n");
+      printf("웜이 둥지를 틀었던 방은 이미 고요합니다.\n");
       advance_time(game, 20);
       flush_events(game);
       return;
     }
-    printf("You descend toward the crater's molten heart.\n");
+    printf("분화구의 용해된 심장부로 하강합니다.\n");
     advance_time(game, 25);
     flush_events(game);
     result = run_battle(game, build_fragment_guardian(game, FRAGMENT_EMBER));
@@ -1731,44 +1709,41 @@ static void explore_special_location(GameState *game) {
     return;
   case ZONE_RUINED_BASILICA:
     if (!game->dawn_key_forged) {
-      printf("The basilica rejects you. Every aisle seems to loop back toward the "
-             "broken doors.\n");
+      printf("대성당이 당신을 거부합니다. 모든 통로가 부서진 문으로 되돌아가는 듯합니다.\n");
       advance_time(game, 20);
       flush_events(game);
       return;
     }
     if (game->basilica_blessing) {
-      printf("You have already taken the basilica's last blessing.\n");
+      printf("이미 대성당의 마지막 축복을 받았습니다.\n");
       advance_time(game, 15);
       flush_events(game);
       return;
     }
-    printf("You kneel beneath the collapsed dome while the Dawn Key shines "
-           "through the dust.\n");
+    printf("무너진 돔 아래 무릎 꿇자 여명의 열쇠가 먼지 사이로 빛납니다.\n");
     game->basilica_blessing = true;
     game->doom = clamp_int(game->doom - 1, 0, 12);
     advance_time(game, 30);
     flush_events(game);
-    printf("A pale ward settles onto your armor. The throne's pull weakens.\n");
+    printf("희미한 결계가 갑옷 위에 내려앉습니다. 왕좌의 끌림이 약해집니다.\n");
     return;
   case ZONE_HOLLOW_THRONE:
     if (!game->dawn_key_forged) {
-      printf("The sealed palace doors reject your approach.\n");
+      printf("봉인된 궁전 문이 접근을 거부합니다.\n");
       return;
     }
-    printf("You step into the throne chamber and the crown turns toward you.\n");
+    printf("왕좌의 방에 발을 들이자 왕관이 당신을 향합니다.\n");
     result = run_battle(game, build_final_boss(game));
     if (result == BATTLE_RESULT_VICTORY) {
       game->final_boss_defeated = true;
       game->crown_quest = QUEST_COMPLETE;
       game->running = false;
-      printf("\nThe Dawn Key breaks, the Hollow Crown shatters, and the buried "
-             "palace finally exhales.\n");
+      printf("\n여명의 열쇠가 부서지고 공허의 왕관이 산산이 깨지며, 묻힌 궁전이 마침내 "
+             "긴 숨을 내쉽니다.\n");
     }
     return;
   default:
-    printf("You search carefully and turn up scraps of lore, old coins, and "
-           "nothing urgent.\n");
+    printf("세밀하게 수색해 오래된 지식 조각과 동전을 찾았지만 급한 단서는 없습니다.\n");
     game->player.gold += 3 + rand() % 4;
     if (rand() % 100 < 30) {
       game->player.relic_dust++;
@@ -1785,34 +1760,29 @@ static void talk_here(GameState *game) {
       game->player.claimed_gate_supplies = true;
       game->player.potions++;
       game->player.bombs++;
-      printf("Quartermaster Iven presses extra supplies into your hands and "
-             "orders you not to die cheaply.\n");
+      printf("병참장교 아이븐이 추가 보급품을 쥐여주며 값싸게 죽지 말라고 경고합니다.\n");
     } else {
-      printf("Iven studies the road. \"The south changes every time you spend "
-             "an hour in it. Stay ahead of the weather and the rumors.\"\n");
+      printf("아이븐이 길을 바라보며 말합니다. \"남부는 한 시간만 지나도 표정이 바뀐다. "
+             "날씨와 소문보다 먼저 움직여라.\"\n");
     }
     break;
   case ZONE_BRASS_MARKET:
     if (game->caravan_quest == QUEST_LOCKED) {
       game->caravan_quest = QUEST_ACTIVE;
       refresh_rumor(game);
-      printf("Merchant Sal slams a broken ledger onto the counter. \"Bandit Reeve "
-             "hit my last caravan in Ironwood Pass. Bring me the ledger and I'll "
-             "owe you more than coin.\"\n");
+      printf("상인 살이 부서진 장부를 내려칩니다. \"철목 고개에서 도적 영주가 내 마지막 "
+             "상단을 털었어. 장부를 찾아오면 돈 이상으로 갚겠어.\"\n");
     } else if (game->caravan_quest == QUEST_ACTIVE) {
-      printf("\"Ironwood Pass,\" Sal repeats. \"The Reeve never stays hidden for "
-             "long if you hunt loud enough.\"\n");
+      printf("\"철목 고개.\" 살이 되뇝니다. \"크게 흔들면 그놈은 오래 숨어 있지 못해.\"\n");
     } else {
-      printf("Sal grins. \"The pass is breathing again. If only the rest of the "
-             "realm would copy it.\"\n");
+      printf("살이 웃습니다. \"고개가 다시 숨 쉬기 시작했어. 다른 지역도 그랬으면 좋겠군.\"\n");
     }
     break;
   case ZONE_VERDANT_ABBEY:
     if (game->remedy_quest == QUEST_LOCKED) {
       game->remedy_quest = QUEST_ACTIVE;
-      printf("Sister Elowen places three empty satchels on the table. \"Bring "
-             "me 3 fresh herb bundles from Moonfen or Cinder Grove. The wounded "
-             "won't survive the week without them.\"\n");
+      printf("엘로웬 수녀가 빈 주머니 세 개를 놓습니다. \"월광 늪이나 숯불 수림에서 "
+             "신선한 약초 묶음 3개를 가져와 주세요. 없으면 부상자들이 이번 주를 못 넘겨요.\"\n");
     } else if (game->remedy_quest == QUEST_ACTIVE && game->player.herbs >= 3) {
       game->player.herbs -= 3;
       game->remedy_quest = QUEST_COMPLETE;
@@ -1820,28 +1790,27 @@ static void talk_here(GameState *game) {
       game->player.max_hp += 4;
       game->player.hp = game->player.max_hp;
       game->player.potions += 2;
-      printf("Elowen brews through the night, then hangs a silver sigil around "
-             "your neck. \"Carry our blessing into the dark.\"\n");
+      printf("엘로웬이 밤새 약을 달인 뒤 은빛 인장을 목에 걸어 줍니다. \"우리의 축복을 "
+             "어둠 속으로 가져가세요.\"\n");
     } else if (game->remedy_quest == QUEST_ACTIVE) {
-      printf("\"I still need 3 herb bundles,\" Elowen says gently. \"You have %d.\"\n",
+      printf("\"약초 묶음이 아직 3개 필요해요.\" 엘로웬이 조용히 말합니다. \"지금 %d개예요.\"\n",
              game->player.herbs);
     } else {
       game->player.hp = game->player.max_hp;
-      printf("The sisters patch your wounds and send you back to the road "
-             "restored.\n");
+      printf("수녀들이 상처를 치료해 주고 다시 길로 돌려보냅니다.\n");
     }
     break;
   case ZONE_WHISPER_LIBRARY:
     if (game->fragments_quest == QUEST_LOCKED) {
       if (game->player.level < 3 && game->caravan_quest != QUEST_COMPLETE) {
-        printf("Archivist Sen studies you over a tower of maps. \"You are not yet "
-               "ready for the fragment hunt. See more of the south first.\"\n");
+        printf("기록관 센이 지도 더미 너머로 당신을 살핍니다. \"아직 파편 사냥을 맡기엔 "
+               "이릅니다. 남부를 더 보고 오세요.\"\n");
       } else {
         game->fragments_quest = QUEST_ACTIVE;
         refresh_rumor(game);
-        printf("Sen unfolds three brittle charts. \"The Dawn Key was shattered. "
-               "Recover its fragments from the Sunken Archive, Frostspire Trail, "
-               "and Obsidian Crater, and I can forge a way into the throne.\"\n");
+        printf("센이 바스라지는 지도 세 장을 펼칩니다. \"여명의 열쇠는 산산조각 났습니다. "
+               "침수 기록고, 빙첨로, 흑요 분화구에서 파편을 회수해 오면 왕좌로 향할 길을 "
+               "열 수 있습니다.\"\n");
       }
     } else if (game->fragments_quest == QUEST_ACTIVE &&
                game->fragment_found[FRAGMENT_TIDAL] &&
@@ -1852,33 +1821,30 @@ static void talk_here(GameState *game) {
       game->dawn_key_forged = true;
       game->doom = clamp_int(game->doom - 2, 0, 12);
       refresh_rumor(game);
-      printf("Sen binds the recovered shards into the Dawn Key. Light runs "
-             "through the cracks like a held sunrise. \"Now you can reach the "
-             "Hollow Throne.\"\n");
+      printf("센이 회수된 파편을 묶어 여명의 열쇠를 완성합니다. 균열 사이로 새벽빛 같은 "
+             "광채가 흐릅니다. \"이제 공허 왕좌에 닿을 수 있습니다.\"\n");
     } else if (game->dawn_key_forged) {
-      printf("\"The basilica will answer the key,\" Sen says. \"Take every edge "
-             "you can before you step through.\"\n");
+      printf("\"대성당은 열쇠에 응답할 겁니다.\" 센이 말합니다. \"넘어가기 전 가능한 "
+             "모든 이점을 챙기세요.\"\n");
     } else {
-      printf("Sen taps the maps one by one. \"Archive. Frostspire. Crater. "
-             "Bring back what the crown broke.\"\n");
+      printf("센이 지도를 하나씩 두드립니다. \"기록고. 빙첨로. 분화구. 왕관이 부순 것을 "
+             "되찾아 오세요.\"\n");
     }
     break;
   case ZONE_GLOAM_PORT:
     if (game->dawn_key_forged) {
-      printf("Captain Mirelle points inland. \"Once you're through the basilica, "
-             "don't stop. The throne feeds on hesitation.\"\n");
+      printf("미렐 선장이 내륙을 가리킵니다. \"대성당을 넘으면 멈추지 마세요. 왕좌는 "
+             "망설임을 먹고 자랍니다.\"\n");
     } else {
-      printf("Mirelle studies the tide marks on an old harbor chart. \"Nothing "
-             "useful stays buried around here, only hidden. Keep pushing east "
-             "and south.\"\n");
+      printf("미렐이 오래된 항로도 조수 흔적을 보며 말합니다. \"쓸모 있는 건 묻혀 있지 "
+             "않고 숨겨져 있을 뿐이죠. 동쪽과 남쪽으로 계속 밀고 가세요.\"\n");
     }
     break;
   case ZONE_LANTERN_WARD:
-    printf("Courier Nara passes along patrol notes and fresh warnings about the "
-           "roads beyond the ward.\n");
+    printf("전령 나라가 순찰 기록과 구역 바깥 도로의 최신 경고를 전합니다.\n");
     break;
   default:
-    printf("There is no one here inclined to talk.\n");
+    printf("이곳에는 대화할 상대가 없습니다.\n");
     return;
   }
   advance_time(game, 20);
@@ -1897,7 +1863,7 @@ static void shop_here(GameState *game) {
   int *stock = NULL;
   bool port_prices = false;
   if (!zone_has_merchant(game, game->player.zone)) {
-    printf("There is no one trading here right now.\n");
+    printf("지금 이곳에는 거래할 상인이 없습니다.\n");
     return;
   }
   if (game->player.zone == ZONE_GLOAM_PORT) {
@@ -1906,13 +1872,13 @@ static void shop_here(GameState *game) {
   } else if (game->player.zone == ZONE_BRASS_MARKET) {
     stock = &game->market_potions;
   }
-  printf("Type `buy potion`, `buy bomb`, or `leave`.\n");
+  printf("`buy potion`, `buy bomb`, `leave` 중 하나를 입력하세요.\n");
   while (game->running) {
     int price = potion_price(game, port_prices);
     int bomb_price = port_prices ? 18 : 20;
-    printf("Stock: potions %d | potion %dg | bomb %dg\n",
+    printf("재고: 포션 %d | 포션 %dg | 폭탄 %dg\n",
            stock != NULL ? *stock : 2, price, bomb_price);
-    if (!read_command("Shop> ", input, sizeof(input))) {
+    if (!read_command("상점> ", input, sizeof(input))) {
       game->running = false;
       return;
     }
@@ -1925,11 +1891,11 @@ static void shop_here(GameState *game) {
     }
     if (strcmp(command, "buy potion") == 0) {
       if (game->player.gold < price) {
-        printf("You do not have enough gold.\n");
+        printf("골드가 부족합니다.\n");
         continue;
       }
       if (stock != NULL && *stock <= 0) {
-        printf("That merchant is sold out.\n");
+        printf("해당 상인의 재고가 소진되었습니다.\n");
         continue;
       }
       game->player.gold -= price;
@@ -1937,37 +1903,37 @@ static void shop_here(GameState *game) {
       if (stock != NULL) {
         (*stock)--;
       }
-      printf("Potion purchased.\n");
+      printf("포션을 구매했습니다.\n");
       advance_time(game, 10);
       flush_events(game);
       continue;
     }
     if (strcmp(command, "buy bomb") == 0) {
       if (game->player.gold < bomb_price) {
-        printf("You do not have enough gold.\n");
+        printf("골드가 부족합니다.\n");
         continue;
       }
       game->player.gold -= bomb_price;
       game->player.bombs++;
-      printf("Bomb purchased.\n");
+      printf("폭탄을 구매했습니다.\n");
       advance_time(game, 10);
       flush_events(game);
       continue;
     }
-    printf("The merchant does not understand that request.\n");
+    printf("상인이 그 요청을 이해하지 못했습니다.\n");
   }
 }
 static void forge_here(GameState *game) {
   char input[MAX_INPUT];
   char command[MAX_INPUT];
   if (!kZones[game->player.zone].forge) {
-    printf("There is no working forge here.\n");
+    printf("이곳에는 작동 가능한 대장간이 없습니다.\n");
     return;
   }
-  printf("Type `craft blade`, `craft mail`, `craft bomb`, or `leave`.\n");
+  printf("`craft blade`, `craft mail`, `craft bomb`, `leave` 중 하나를 입력하세요.\n");
   while (game->running) {
-    printf("Ore %d | Blade 4 ore | Mail 6 ore | Bomb 2 ore\n", game->player.ore);
-    if (!read_command("Forge> ", input, sizeof(input))) {
+    printf("광석 %d | 검 4개 | 갑옷 6개 | 폭탄 2개\n", game->player.ore);
+    if (!read_command("대장간> ", input, sizeof(input))) {
       game->running = false;
       return;
     }
@@ -1977,50 +1943,49 @@ static void forge_here(GameState *game) {
     }
     if (strcmp(command, "craft blade") == 0) {
       if (game->player.steel_edge) {
-        printf("Your blade is already reforged.\n");
+        printf("이미 검을 재단련했습니다.\n");
         continue;
       }
       if (game->player.ore < 4) {
-        printf("You need 4 ore.\n");
+        printf("광석 4개가 필요합니다.\n");
         continue;
       }
       game->player.ore -= 4;
       game->player.steel_edge = true;
-      printf("You reforge your weapon into the Steel Edge.\n");
+      printf("무기를 재단련해 강철 칼날로 만들었습니다.\n");
       advance_time(game, 45);
       flush_events(game);
       continue;
     }
     if (strcmp(command, "craft mail") == 0) {
       if (game->player.ward_mail) {
-        printf("Your armor is already reinforced.\n");
+        printf("이미 갑옷을 강화했습니다.\n");
         continue;
       }
       if (game->player.ore < 6) {
-        printf("You need 6 ore.\n");
+        printf("광석 6개가 필요합니다.\n");
         continue;
       }
       game->player.ore -= 6;
       game->player.ward_mail = true;
-      printf("You temper fresh plates into your armor and finish a set of ward "
-             "mail.\n");
+      printf("새 철판을 단련해 수호 갑옷 세트를 완성했습니다.\n");
       advance_time(game, 55);
       flush_events(game);
       continue;
     }
     if (strcmp(command, "craft bomb") == 0) {
       if (game->player.ore < 2) {
-        printf("You need 2 ore.\n");
+        printf("광석 2개가 필요합니다.\n");
         continue;
       }
       game->player.ore -= 2;
       game->player.bombs++;
-      printf("You shape a rough but effective bomb.\n");
+      printf("거칠지만 실용적인 폭탄을 제작했습니다.\n");
       advance_time(game, 20);
       flush_events(game);
       continue;
     }
-    printf("The forge does not respond to that command.\n");
+    printf("대장간이 그 명령에는 반응하지 않습니다.\n");
   }
 }
 static void rest_here(GameState *game) {
@@ -2033,29 +1998,29 @@ static void rest_here(GameState *game) {
              game->player.zone == ZONE_LANTERN_WARD) {
     cost = 8;
   } else {
-    printf("This is not a place where you can safely rest.\n");
+    printf("이곳은 안전하게 휴식할 수 있는 장소가 아닙니다.\n");
     return;
   }
   if (game->player.gold < cost) {
-    printf("You cannot afford a proper room.\n");
+    printf("숙소를 이용할 골드가 부족합니다.\n");
     return;
   }
   game->player.gold -= cost;
   advance_time(game, 480);
   game->player.hp = game->player.max_hp;
-  printf("You rest until your strength returns. HP restored to %d.\n",
+  printf("휴식으로 기력을 회복했습니다. 체력이 %d로 회복되었습니다.\n",
          game->player.hp);
   flush_events(game);
 }
 static bool move_player(GameState *game, const char *direction) {
   int next_zone = zone_from_direction(game->player.zone, direction);
   if (next_zone == ZONE_NONE) {
-    printf("That path is closed.\n");
+    printf("그 길은 막혀 있습니다.\n");
     return false;
   }
   if (next_zone == ZONE_HOLLOW_THRONE && !game->dawn_key_forged) {
-    printf("A sealed pressure in the earth turns you back. Something deeper "
-           "than stone still bars the palace.\n");
+    printf("봉인된 압력이 발길을 돌립니다. 돌보다 깊은 무언가가 아직 궁전을 가로막고 "
+           "있습니다.\n");
     return false;
   }
   game->player.zone = next_zone;
@@ -2084,7 +2049,7 @@ static bool maybe_handle_movement_command(GameState *game, const char *command) 
   return true;
 }
 static void print_intro(void) {
-  printf("Feather RPG: Hollow Crown의 재\n");
+  printf("Feather RPG: 공허의 왕관의 재\n");
   printf("Feather 협력형 스케줄러로 구동되는 텍스트 RPG입니다.\n");
   printf("시간이 흐르는 동안 세계는 계속 움직입니다: 날씨 변화, 상단 이동, "
          "소문 확산, 파멸도 상승, 그리고 길 위의 회복/위협.\n");
@@ -2096,17 +2061,17 @@ int rpg_run(void) {
   srand((unsigned int)time(NULL));
   init_game(&game);
   print_intro();
-  if (read_command("수호자의 이름을 입력하세요 (빈칸이면 Warden): ", input,
+  if (read_command("수호자의 이름을 입력하세요 (빈칸이면 수호자): ", input,
                    sizeof(input)) &&
       !is_blank(input)) {
     snprintf(game.player.name, sizeof(game.player.name), "%s", input);
   }
-  printf("\n%s이(가) 남부 순찰대의 불빛이 희미해지는 저녁, Emberfall Gate에 도착했습니다.\n",
+  printf("\n%s이(가) 남부 순찰대의 불빛이 희미해지는 저녁, 엠버폴 관문에 도착했습니다.\n",
          game.player.name);
   describe_zone(&game);
   show_help();
   while (game.running) {
-    if (!read_command("\nCommand> ", input, sizeof(input))) {
+    if (!read_command("\n명령> ", input, sizeof(input))) {
       break;
     }
     canonicalize_input(input, command, sizeof(command));
@@ -2179,7 +2144,7 @@ int rpg_run(void) {
     }
   }
   if (game.final_boss_defeated) {
-    printf("\n승리했습니다. 길은 여전히 수호자를 필요로 하지만, 더 이상 Hollow Crown에 "
+    printf("\n승리했습니다. 길은 여전히 수호자를 필요로 하지만, 더 이상 공허의 왕관에 "
            "지배당하지 않습니다.\n");
   } else if (!game.running && game.player.hp <= 0) {
     printf("게임 오버.\n");
