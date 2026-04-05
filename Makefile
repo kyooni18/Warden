@@ -14,10 +14,10 @@ feather: configure
 	cmake --build $(BUILD_DIR) --target Feather
 
 rpg: configure
-	cmake --build $(BUILD_DIR) --target cli_text_rpg
+	cmake --build $(BUILD_DIR) --target warden
 
 run-rpg: rpg
-	./$(BUILD_DIR)/CLITextRPG
+	./$(BUILD_DIR)/Warden
 
 clean:
 	cmake -E rm -rf $(BUILD_DIR)
