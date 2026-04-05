@@ -11,6 +11,7 @@ add_subdirectory(Feather)
 add_executable(warden
     RPG/main.c
     RPG/game.c
+    RPG/game_world.c
 )
 
 target_link_libraries(warden PRIVATE Feather::Feather)
