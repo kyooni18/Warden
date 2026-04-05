@@ -6,7 +6,9 @@ Feather as a library.
 ## Structure
 
 - `Feather/` contains the reusable scheduler library.
-- `RPG/main.c` contains the game application.
+- `RPG/main.c` contains a thin executable entrypoint.
+- `RPG/game.c` contains the game application logic.
+- `RPG/game.h` declares the game runner interface.
 
 ## Build
 
