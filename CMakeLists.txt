@@ -10,6 +10,7 @@ add_subdirectory(Feather)
 
 add_executable(cli_text_rpg
     RPG/main.c
+    RPG/game.c
 )
 
 target_link_libraries(cli_text_rpg PRIVATE Feather::Feather)
