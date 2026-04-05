@@ -4,19 +4,19 @@ if(APPLE AND (NOT DEFINED CMAKE_OSX_ARCHITECTURES OR CMAKE_OSX_ARCHITECTURES STR
     set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Architectures to build for on macOS" FORCE)
 endif()
 
-project(CLITextGame VERSION 0.1.0 LANGUAGES C)
+project(Warden VERSION 0.1.0 LANGUAGES C)
 
 add_subdirectory(Feather)
 
-add_executable(cli_text_rpg
+add_executable(warden
     RPG/main.c
     RPG/game.c
 )
 
-target_link_libraries(cli_text_rpg PRIVATE Feather::Feather)
+target_link_libraries(warden PRIVATE Feather::Feather)
 
-set_target_properties(cli_text_rpg PROPERTIES
-    OUTPUT_NAME CLITextRPG
+set_target_properties(awrden PROPERTIES
+    OUTPUT_NAME Warden
     C_STANDARD 99
     C_STANDARD_REQUIRED YES
     C_EXTENSIONS NO
