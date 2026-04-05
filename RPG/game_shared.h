@@ -185,4 +185,60 @@ extern const ZoneData kZones[ZONE_COUNT];
 extern const char *kWeatherNames[WEATHER_COUNT];
 extern const char *kFragmentNames[FRAGMENT_COUNT];
 
+
+/* ---- game_utils.c ---- */
+int clamp_int(int value, int min_value, int max_value);
+uint64_t minutes_to_ms(int minutes);
+int roll_range(int min_value, int max_value);
+bool is_blank(const char *text);
+void canonicalize_input(const char *input, char *output, size_t output_size);
+bool starts_with(const char *text, const char *prefix);
+
+/* ---- game_state.c ---- */
+void push_event(GameState *game, const char *fmt, ...);
+void flush_events(GameState *game);
+int current_day(const GameState *game);
+int current_hour(const GameState *game);
+int current_minute(const GameState *game);
+const char *time_band(const GameState *game);
+bool zone_has_merchant(const GameState *game, int zone);
+int zone_from_direction(int zone, const char *direction);
+void show_exits(int zone);
+int player_attack_value(const GameState *game);
+int player_defense_value(const GameState *game);
+void refresh_rumor(GameState *game);
+void advance_time(GameState *game, int minutes);
+void init_game(GameState *game);
+void shutdown_game(GameState *game);
+bool save_game(const GameState *game, const char *path);
+bool load_game(GameState *game, const char *path);
+
+/* ---- game_ui.c ---- */
+void describe_zone(const GameState *game);
+void show_help(void);
+void show_map(const GameState *game);
+void show_stats(const GameState *game);
+void show_inventory(const GameState *game);
+void show_time(const GameState *game);
+void show_quests(const GameState *game);
+bool read_command(const char *prompt, char *buffer, size_t buffer_size);
+
+/* ---- game_combat.c ---- */
+Enemy build_regular_enemy(GameState *game, int zone);
+Enemy build_fragment_guardian(GameState *game, FragmentId fragment);
+Enemy build_final_boss(GameState *game);
+BattleResult run_battle(GameState *game, Enemy enemy);
+
+/* ---- game_actions.c ---- */
+void use_potion_outside_combat(GameState *game);
+void hunt_current_zone(GameState *game);
+void scout_zone(GameState *game);
+void gather_resources(GameState *game);
+void explore_special_location(GameState *game);
+void talk_here(GameState *game);
+void shop_here(GameState *game);
+void forge_here(GameState *game);
+void rest_here(GameState *game);
+bool maybe_handle_movement_command(GameState *game, const char *command);
+
 #endif
