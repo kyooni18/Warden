@@ -13,6 +13,9 @@
 #define MAX_EVENTS 24
 #define MAX_EVENT_TEXT 256
 #define MAX_NAME 48
+#define SAVE_FILE_PATH "savegame.dat"
+#define SAVE_MAGIC 0x52504753u
+#define SAVE_VERSION 1u
 #define ZONE_NONE (-1)
 typedef enum ZoneId {
   ZONE_EMBERFALL_GATE = 0,
@@ -153,6 +156,28 @@ typedef struct GameState {
   bool final_boss_defeated;
   bool running;
 } GameState;
+typedef struct SaveData {
+  uint32_t magic;
+  uint32_t version;
+  uint64_t clock_ms;
+  int weather;
+  int doom;
+  int market_potions;
+  int port_potions;
+  int caravan_zone;
+  char rumor[MAX_EVENT_TEXT];
+  Player player;
+  int remedy_quest;
+  int caravan_quest;
+  int fragments_quest;
+  int crown_quest;
+  bool fragment_found[FRAGMENT_COUNT];
+  bool bandit_reeve_defeated;
+  bool dawn_key_forged;
+  bool basilica_blessing;
+  bool final_boss_defeated;
+  bool running;
+} SaveData;
 static const ZoneData kZones[ZONE_COUNT] = {
     [ZONE_EMBERFALL_GATE] = {
         .name = "Emberfall Gate",
@@ -541,7 +566,7 @@ static void push_event(GameState *game, const char *fmt, ...) {
 static void flush_events(GameState *game) {
   int index;
   for (index = 0; index < game->event_count; index++) {
-    printf("[World] %s\n", game->events[index]);
+    printf("[세계] %s\n", game->events[index]);
   }
   game->event_count = 0;
 }
@@ -610,7 +635,7 @@ static int zone_from_direction(int zone, const char *direction) {
   return ZONE_NONE;
 }
 static void show_exits(int zone) {
-  printf("Exits:");
+  printf("이동 가능:");
   if (zone_north(zone) != ZONE_NONE) {
     printf(" north");
   }
@@ -805,47 +830,143 @@ static void init_game(GameState *game) {
 static void shutdown_game(GameState *game) {
   Feather_deinit(&game->feather);
 }
+static bool save_game(const GameState *game, const char *path) {
+  FILE *file = fopen(path, "wb");
+  SaveData data;
+  if (file == NULL) {
+    return false;
+  }
+  memset(&data, 0, sizeof(data));
+  data.magic = SAVE_MAGIC;
+  data.version = SAVE_VERSION;
+  data.clock_ms = game->clock_ms;
+  data.weather = (int)game->weather;
+  data.doom = game->doom;
+  data.market_potions = game->market_potions;
+  data.port_potions = game->port_potions;
+  data.caravan_zone = game->caravan_zone;
+  snprintf(data.rumor, sizeof(data.rumor), "%s", game->rumor);
+  data.player = game->player;
+  data.remedy_quest = (int)game->remedy_quest;
+  data.caravan_quest = (int)game->caravan_quest;
+  data.fragments_quest = (int)game->fragments_quest;
+  data.crown_quest = (int)game->crown_quest;
+  memcpy(data.fragment_found, game->fragment_found, sizeof(data.fragment_found));
+  data.bandit_reeve_defeated = game->bandit_reeve_defeated;
+  data.dawn_key_forged = game->dawn_key_forged;
+  data.basilica_blessing = game->basilica_blessing;
+  data.final_boss_defeated = game->final_boss_defeated;
+  data.running = game->running;
+  if (fwrite(&data, sizeof(data), 1, file) != 1) {
+    fclose(file);
+    return false;
+  }
+  fclose(file);
+  return true;
+}
+static bool load_game(GameState *game, const char *path) {
+  FILE *file = fopen(path, "rb");
+  SaveData data;
+  if (file == NULL) {
+    return false;
+  }
+  if (fread(&data, sizeof(data), 1, file) != 1) {
+    fclose(file);
+    return false;
+  }
+  fclose(file);
+  if (data.magic != SAVE_MAGIC || data.version != SAVE_VERSION) {
+    return false;
+  }
+  if (data.weather < 0 || data.weather >= WEATHER_COUNT ||
+      data.player.zone < 0 || data.player.zone >= ZONE_COUNT ||
+      data.caravan_zone < 0 || data.caravan_zone >= ZONE_COUNT) {
+    return false;
+  }
+  shutdown_game(game);
+  memset(game, 0, sizeof(*game));
+  game->clock_ms = data.clock_ms;
+  game->weather = (WeatherId)data.weather;
+  game->doom = clamp_int(data.doom, 0, 12);
+  game->market_potions = data.market_potions;
+  game->port_potions = data.port_potions;
+  game->caravan_zone = data.caravan_zone;
+  snprintf(game->rumor, sizeof(game->rumor), "%s", data.rumor);
+  game->player = data.player;
+  game->remedy_quest = (QuestStage)data.remedy_quest;
+  game->caravan_quest = (QuestStage)data.caravan_quest;
+  game->fragments_quest = (QuestStage)data.fragments_quest;
+  game->crown_quest = (QuestStage)data.crown_quest;
+  memcpy(game->fragment_found, data.fragment_found, sizeof(game->fragment_found));
+  game->bandit_reeve_defeated = data.bandit_reeve_defeated;
+  game->dawn_key_forged = data.dawn_key_forged;
+  game->basilica_blessing = data.basilica_blessing;
+  game->final_boss_defeated = data.final_boss_defeated;
+  game->running = data.running;
+  game->event_count = 0;
+  game->combat.active = false;
+  game->combat.guard_active = false;
+  game->combat.enemy_charging = false;
+  game->combat.weaken_turns = 0;
+  memset(&game->combat.enemy, 0, sizeof(game->combat.enemy));
+  Feather_init(&game->feather);
+  Feather_set_time_source(&game->feather, game_now_ms, game);
+  enqueue_repeating_task(game, task_weather_shift, 180, 180,
+                         FSScheduler_Priority_BACKGROUND);
+  enqueue_repeating_task(game, task_restock, 720, 720,
+                         FSScheduler_Priority_BACKGROUND);
+  enqueue_repeating_task(game, task_regen, 90, 90,
+                         FSScheduler_Priority_UI);
+  enqueue_repeating_task(game, task_doom, 1440, 1440,
+                         FSScheduler_Priority_INTERACTIVE);
+  enqueue_repeating_task(game, task_rumor, 240, 240,
+                         FSScheduler_Priority_BACKGROUND);
+  if (is_blank(game->rumor)) {
+    refresh_rumor(game);
+  }
+  return true;
+}
 static void describe_zone(const GameState *game) {
   const ZoneData *zone = &kZones[game->player.zone];
   printf("\n== %s ==\n", zone->name);
   printf("%s\n", zone->description);
-  printf("Weather: %s | Day %d, %02d:%02d (%s)\n", kWeatherNames[game->weather],
+  printf("날씨: %s | %d일차 %02d:%02d (%s)\n", kWeatherNames[game->weather],
          current_day(game), current_hour(game), current_minute(game),
          time_band(game));
   if (!zone->safe && zone->danger > 0) {
-    printf("Danger: %d/8\n", zone->danger + game->doom / 3);
+    printf("위험도: %d/8\n", zone->danger + game->doom / 3);
   } else {
-    printf("Danger: Safe ground\n");
+    printf("위험도: 안전 지대\n");
   }
   printf("%s\n", zone->scout_text);
   if (zone->npc != NULL && zone->npc[0] != '\0') {
-    printf("Notable presence: %s\n", zone->npc);
+    printf("주요 인물/징후: %s\n", zone->npc);
   }
   if (zone_has_merchant(game, game->player.zone)) {
     if (kZones[game->player.zone].merchant) {
-      printf("A resident merchant is open for trade.\n");
+      printf("상인이 상점을 열고 있습니다.\n");
     } else {
-      printf("A traveling caravan has set up shop here.\n");
+      printf("이동 상단이 이곳에 임시 상점을 열었습니다.\n");
     }
   }
   if (zone->forge) {
-    printf("The dormant forge can be used with `forge`.\n");
+    printf("`forge` 명령으로 대장간을 사용할 수 있습니다.\n");
   }
   show_exits(game->player.zone);
 }
 static void show_help(void) {
-  printf("\nCommands:\n");
+  printf("\n명령어:\n");
   printf("  look, map, stats, inventory, quests, rumor, time\n");
   printf("  north/south/east/west, go <direction>, travel <direction>\n");
   printf("  scout, hunt, gather, explore, talk, shop, forge, rest\n");
-  printf("  use potion, quit\n");
-  printf("\nCombat commands:\n");
+  printf("  use potion, save, load, quit\n");
+  printf("\n전투 명령어:\n");
   printf("  attack, cleave, guard, potion, bomb, flee, status\n");
 }
 static void show_map(const GameState *game) {
   int row;
   int col;
-  printf("\nWorld Map\n");
+  printf("\n세계 지도\n");
   for (row = 0; row < 4; row++) {
     for (col = 0; col < 4; col++) {
       int zone = row * 4 + col;
@@ -867,19 +988,19 @@ static void show_map(const GameState *game) {
   }
 }
 static void show_stats(const GameState *game) {
-  printf("\n%s, level %d\n", game->player.name, game->player.level);
-  printf("HP %d/%d | XP %d/%d | Gold %d | Doom %d\n", game->player.hp,
+  printf("\n%s, 레벨 %d\n", game->player.name, game->player.level);
+  printf("체력 %d/%d | 경험치 %d/%d | 골드 %d | 파멸도 %d\n", game->player.hp,
          game->player.max_hp, game->player.xp, game->player.xp_to_next,
          game->player.gold, game->doom);
-  printf("Attack %d | Defense %d | Victories %d\n", player_attack_value(game),
+  printf("공격력 %d | 방어력 %d | 승리 %d\n", player_attack_value(game),
          player_defense_value(game), game->player.victories);
 }
 static void show_inventory(const GameState *game) {
-  printf("\nInventory\n");
-  printf("Potions: %d | Bombs: %d | Herbs: %d | Ore: %d | Relic Dust: %d\n",
+  printf("\n인벤토리\n");
+  printf("포션: %d | 폭탄: %d | 약초: %d | 광석: %d | 유물 가루: %d\n",
          game->player.potions, game->player.bombs, game->player.herbs,
          game->player.ore, game->player.relic_dust);
-  printf("Gear: %s, %s, %s\n",
+  printf("장비: %s, %s, %s\n",
          game->player.steel_edge ? "Steel Edge" : "Traveler's Blade",
          game->player.ward_mail ? "Ward Mail" : "Road Leathers",
          game->player.abbey_sigil ? "Abbey Sigil" : "No Sigil");
@@ -897,16 +1018,16 @@ static void show_inventory(const GameState *game) {
     }
   }
   if (game->dawn_key_forged) {
-    printf("Key Item: Dawn Key\n");
+    printf("핵심 아이템: Dawn Key\n");
   }
 }
 static void show_time(const GameState *game) {
-  printf("Day %d, %02d:%02d. It is %s, and the sky is %s.\n", current_day(game),
+  printf("%d일차 %02d:%02d. 지금은 %s이며, 하늘은 %s입니다.\n", current_day(game),
          current_hour(game), current_minute(game), time_band(game),
          kWeatherNames[game->weather]);
 }
 static void show_quests(const GameState *game) {
-  printf("\nQuest Log\n");
+  printf("\n퀘스트 기록\n");
   if (game->remedy_quest == QUEST_ACTIVE) {
     printf("  Sister's Remedy: Bring 3 herbs to Sister Elowen at Verdant Abbey. "
            "(You have %d)\n",
@@ -1963,10 +2084,10 @@ static bool maybe_handle_movement_command(GameState *game, const char *command) 
   return true;
 }
 static void print_intro(void) {
-  printf("Feather RPG: Ashes of the Hollow Crown\n");
-  printf("A large-volume text RPG powered by Feather's cooperative scheduler.\n");
-  printf("As you spend time, the world keeps moving: weather shifts, caravans "
-         "travel, rumors spread, doom rises, and the road heals or harms you.\n");
+  printf("Feather RPG: Hollow Crown의 재\n");
+  printf("Feather 협력형 스케줄러로 구동되는 텍스트 RPG입니다.\n");
+  printf("시간이 흐르는 동안 세계는 계속 움직입니다: 날씨 변화, 상단 이동, "
+         "소문 확산, 파멸도 상승, 그리고 길 위의 회복/위협.\n");
 }
 int rpg_run(void) {
   GameState game;
@@ -1975,13 +2096,12 @@ int rpg_run(void) {
   srand((unsigned int)time(NULL));
   init_game(&game);
   print_intro();
-  if (read_command("Name your warden (blank for Warden): ", input,
+  if (read_command("수호자의 이름을 입력하세요 (빈칸이면 Warden): ", input,
                    sizeof(input)) &&
       !is_blank(input)) {
     snprintf(game.player.name, sizeof(game.player.name), "%s", input);
   }
-  printf("\n%s arrives at Emberfall Gate as the southern patrol fires begin to "
-         "fade.\n",
+  printf("\n%s이(가) 남부 순찰대의 불빛이 희미해지는 저녁, Emberfall Gate에 도착했습니다.\n",
          game.player.name);
   describe_zone(&game);
   show_help();
@@ -1996,7 +2116,7 @@ int rpg_run(void) {
     if (maybe_handle_movement_command(&game, command)) {
       continue;
     }
-    if (strcmp(command, "help") == 0) {
+    if (strcmp(command, "help") == 0 || strcmp(command, "도움말") == 0) {
       show_help();
     } else if (strcmp(command, "look") == 0 || strcmp(command, "l") == 0) {
       describe_zone(&game);
@@ -2037,20 +2157,32 @@ int rpg_run(void) {
     } else if (strcmp(command, "use potion") == 0 ||
                strcmp(command, "potion") == 0) {
       use_potion_outside_combat(&game);
+    } else if (strcmp(command, "save") == 0 || strcmp(command, "저장") == 0) {
+      if (save_game(&game, SAVE_FILE_PATH)) {
+        printf("게임이 %s 파일에 저장되었습니다.\n", SAVE_FILE_PATH);
+      } else {
+        printf("저장에 실패했습니다.\n");
+      }
+    } else if (strcmp(command, "load") == 0 || strcmp(command, "불러오기") == 0) {
+      if (load_game(&game, SAVE_FILE_PATH)) {
+        printf("%s 파일에서 게임을 불러왔습니다.\n", SAVE_FILE_PATH);
+        describe_zone(&game);
+      } else {
+        printf("불러오기에 실패했습니다. 저장 파일이 없거나 형식이 올바르지 않습니다.\n");
+      }
     } else if (strcmp(command, "quit") == 0 ||
-               strcmp(command, "exit") == 0) {
-      printf("You turn back toward the nearest fire and leave the south for "
-             "another day.\n");
+               strcmp(command, "exit") == 0 || strcmp(command, "종료") == 0) {
+      printf("가장 가까운 불빛 쪽으로 물러나 오늘의 원정을 마칩니다.\n");
       break;
     } else {
-      printf("Unknown command. Type `help` for the command list.\n");
+      printf("알 수 없는 명령어입니다. `help`로 목록을 확인하세요.\n");
     }
   }
   if (game.final_boss_defeated) {
-    printf("\nVictory. The roads will still need wardens, but they will no "
-           "longer answer to the Hollow Crown.\n");
+    printf("\n승리했습니다. 길은 여전히 수호자를 필요로 하지만, 더 이상 Hollow Crown에 "
+           "지배당하지 않습니다.\n");
   } else if (!game.running && game.player.hp <= 0) {
-    printf("Game over.\n");
+    printf("게임 오버.\n");
   }
   shutdown_game(&game);
   return 0;
