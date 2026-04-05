@@ -1,32 +1,31 @@
 # CLITextGame
 
-This repository contains a standalone text RPG application that links against
-Feather as a library.
+이 저장소는 Feather 라이브러리를 연결해 동작하는 독립형 텍스트 RPG 애플리케이션을 포함합니다.
 
-## Structure
+## 구조
 
-- `Feather/` contains the reusable scheduler library.
-- `RPG/main.c` contains a thin executable entrypoint.
-- `RPG/game.c` contains the game application logic.
-- `RPG/game.h` declares the game runner interface.
+- `Feather/`에는 재사용 가능한 스케줄러 라이브러리가 있습니다.
+- `RPG/main.c`는 얇은 실행 진입점입니다.
+- `RPG/game.c`는 게임 애플리케이션 로직을 담고 있습니다.
+- `RPG/game.h`는 게임 실행 인터페이스를 선언합니다.
 
-## Build
+## 빌드
 
 ```sh
 make rpg
 ```
 
-## Run
+## 실행
 
 ```sh
 make run-rpg
 ```
 
-The executable is generated at `build/CLITextRPG`.
+실행 파일은 `build/CLITextRPG` 경로에 생성됩니다.
 
-## Notes
+## 참고
 
-- The game now shows core UI prompts/messages in Korean.
-- In-game commands include save/load support:
-  - `save` to write progress to `savegame.dat`
-  - `load` to restore progress from `savegame.dat`
+- 게임의 핵심 UI 안내/메시지는 한국어로 표시됩니다.
+- 게임 내 명령은 저장/불러오기를 지원합니다.
+  - `save`: 진행 상황을 `savegame.dat`에 저장
+  - `load`: `savegame.dat`에서 진행 상황 복원
