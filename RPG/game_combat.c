@@ -450,8 +450,101 @@ static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone
   printf("보상: 경험치 %d, 골드 %d.\n", enemy->xp_reward,
          enemy->gold_reward + bonus_gold);
 }
+/* ---- Non-blocking combat input ----
+ * Waits for a keypress (or typed command + Enter).  Single-key shortcuts
+ * map immediately to a command string without needing Enter.
+ * Returns false only if the game should terminate (window closed, etc.).
+ */
+static bool combat_read_command(GameState *game, char *cmd, size_t cmd_size)
+{
+  TuiState *tui = tui_get_global();
+  char buf[MAX_INPUT];
+  int  len = 0;
+  memset(buf, 0, sizeof(buf));
+
+  /* Update the shared input buffer display */
+  if (tui) {
+    tui->input_buf[0] = '\0';
+    tui->input_len = 0;
+  }
+
+  while (1) {
+    /* Refresh combat display every iteration */
+    if (tui && tui->initialized) {
+      tui_draw_combat_overlay(tui, game);
+    }
+
+    int ch = getch();
+    if (ch == ERR) {
+      struct timespec ts = {0, 20000000L}; /* 20 ms */
+      nanosleep(&ts, NULL);
+      continue;
+    }
+
+    /* ---- Single-key shortcuts (only when buffer is empty) ---- */
+    if (len == 0) {
+      const char *shortcut = NULL;
+      switch (ch) {
+      case '1': shortcut = "attack"; break;
+      case '2': shortcut = "guard";  break;
+      case '3':
+        /* Class ability */
+        switch (game->player.player_class) {
+        case CLASS_WARRIOR: shortcut = "parry";    break;
+        case CLASS_SCOUT:   shortcut = "backstab"; break;
+        case CLASS_MAGE:    shortcut = "fireball"; break;
+        case CLASS_CLERIC:  shortcut = "smite";    break;
+        }
+        break;
+      case '4': shortcut = "flee";           break;
+      case '5': shortcut = "potion";         break;
+      case '6': shortcut = "bomb";           break;
+      case '7': shortcut = "use holy water"; break;
+      default:  break;
+      }
+      if (shortcut) {
+        snprintf(cmd, cmd_size, "%s", shortcut);
+        if (tui) { tui->input_buf[0] = '\0'; tui->input_len = 0; }
+        return true;
+      }
+    }
+
+    /* Backspace */
+    if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
+      if (len > 0) {
+        buf[--len] = '\0';
+        if (tui && len < (int)sizeof(tui->input_buf)) {
+          memcpy(tui->input_buf, buf, (size_t)len + 1);
+          tui->input_len = len;
+        }
+      }
+      continue;
+    }
+
+    /* Enter: submit */
+    if (ch == '\n' || ch == '\r' || ch == KEY_ENTER) {
+      if (len > 0) {
+        canonicalize_input(buf, cmd, cmd_size);
+        if (tui) { tui->input_buf[0] = '\0'; tui->input_len = 0; }
+        return cmd[0] != '\0';
+      }
+      continue;
+    }
+
+    /* Printable ASCII */
+    if (ch >= 32 && ch < 127 && len < (int)sizeof(buf) - 1) {
+      buf[len++] = (char)ch;
+      buf[len]   = '\0';
+      if (tui && len < (int)sizeof(tui->input_buf)) {
+        memcpy(tui->input_buf, buf, (size_t)len + 1);
+        tui->input_len = len;
+      }
+    }
+  }
+}
+
 BattleResult run_battle(GameState *game, Enemy enemy) {
-  char input[MAX_INPUT];
+  TuiState *tui = tui_get_global();
   char command[MAX_INPUT];
   game->combat.active = true;
   game->combat.guard_active = false;
@@ -463,43 +556,51 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
   game->combat.enemy_stun_turns = 0;
   game->combat.player_bleed_turns = 0;
   game->combat.enemy = enemy;
+  if (tui) tui->combat_mode = true;
   if (game->combat.enemy.is_elite) {
-    printf("\n★ 정예 적 등장! ★\n");
+    printf("★ 정예 적 등장! ★");
   }
-  printf("\n%s\n", game->combat.enemy.intro);
+  printf("%s", game->combat.enemy.intro);
   while (game->combat.enemy.hp > 0 && game->player.hp > 0) {
     int player_damage = 0;
     int enemy_damage = 0;
     bool spend_turn = false;
-    /* Status suffix */
-    printf("\n%s HP %d/%d", game->player.name, game->player.hp,
-           game->player.max_hp);
-    if (game->combat.player_bleed_turns > 0) {
-      printf(" [출혈%d]", game->combat.player_bleed_turns);
+    /* Status line written to the log so it's visible in the scrolling history */
+    {
+      char status[256];
+      int slen = 0;
+      slen += snprintf(status + slen, sizeof(status) - slen,
+                       "%s HP %d/%d", game->player.name,
+                       game->player.hp, game->player.max_hp);
+      if (game->combat.player_bleed_turns > 0)
+        slen += snprintf(status + slen, sizeof(status) - slen,
+                         " [출혈%d]", game->combat.player_bleed_turns);
+      if (game->combat.weaken_turns > 0)
+        slen += snprintf(status + slen, sizeof(status) - slen,
+                         " [약화%d]", game->combat.weaken_turns);
+      slen += snprintf(status + slen, sizeof(status) - slen,
+                       " | %s HP %d/%d", game->combat.enemy.name,
+                       game->combat.enemy.hp, game->combat.enemy.max_hp);
+      if (game->combat.enemy_burn_turns > 0)
+        slen += snprintf(status + slen, sizeof(status) - slen,
+                         " [화상%d]", game->combat.enemy_burn_turns);
+      if (game->combat.enemy_stun_turns > 0)
+        slen += snprintf(status + slen, sizeof(status) - slen,
+                         " [기절%d]", game->combat.enemy_stun_turns);
+      (void)slen;
+      printf("%s", status);
     }
-    if (game->combat.weaken_turns > 0) {
-      printf(" [약화%d]", game->combat.weaken_turns);
-    }
-    printf(" | %s HP %d/%d", game->combat.enemy.name, game->combat.enemy.hp,
-           game->combat.enemy.max_hp);
-    if (game->combat.enemy_burn_turns > 0) {
-      printf(" [화상%d]", game->combat.enemy_burn_turns);
-    }
-    if (game->combat.enemy_stun_turns > 0) {
-      printf(" [기절%d]", game->combat.enemy_stun_turns);
-    }
-    printf("\n");
-    if (!read_command("전투> ", input, sizeof(input))) {
+    if (!combat_read_command(game, command, sizeof(command))) {
       game->running = false;
       game->combat.active = false;
+      if (tui) tui->combat_mode = false;
       return BATTLE_RESULT_DEFEAT;
     }
-    canonicalize_input(input, command, sizeof(command));
     if (command[0] == '\0') {
       continue;
     }
     if (strcmp(command, "help") == 0) {
-      printf("공용: attack, cleave(Lv3), devastate(Lv6), guard, potion, bomb, flee, status\n");
+      printf("공용: attack, cleave(Lv3), devastate(Lv6), guard, potion, bomb, flee, status");
       if (game->player.player_class == CLASS_WARRIOR) {
         printf("전사: parry, bash(Lv5)\n");
       } else if (game->player.player_class == CLASS_SCOUT) {
@@ -669,10 +770,11 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
         flee_chance += 10;
       }
       if (rand() % 100 < flee_chance) {
-        printf("틈을 만들어 탈출했습니다.\n");
+        printf("틈을 만들어 탈출했습니다.");
         advance_time(game, 10);
         flush_events(game);
         game->combat.active = false;
+        if (tui) tui->combat_mode = false;
         return BATTLE_RESULT_FLED;
       }
       printf("이탈을 시도했지만 %s이(가) 길을 막습니다.\n",
@@ -750,6 +852,7 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       advance_time(game, 5);
       flush_events(game);
       game->combat.active = false;
+      if (tui) tui->combat_mode = false;
       return BATTLE_RESULT_FLED;
     }
     /* ---- Mage abilities ---- */
@@ -869,9 +972,10 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       printf("출혈로 %d 피해를 받았습니다. (체력 %d/%d)\n", bleed_dmg,
              game->player.hp, game->player.max_hp);
       if (game->player.hp <= 0) {
-        printf("\n%s이(가) 쓰러지고 길은 어둠에 잠깁니다.\n", game->player.name);
+        printf("%s이(가) 쓰러지고 길은 어둠에 잠깁니다.", game->player.name);
         game->running = false;
         game->combat.active = false;
+        if (tui) tui->combat_mode = false;
         return BATTLE_RESULT_DEFEAT;
       }
     }
@@ -984,16 +1088,23 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
     }
     advance_time(game, 5);
     flush_events(game);
+    /* Brief pause so the player can read the enemy's action result */
+    if (tui && tui->initialized) {
+      tui_draw_combat_overlay(tui, game);
+      struct timespec ts = {0, 400000000L}; /* 400 ms */
+      nanosleep(&ts, NULL);
+    }
   }
   game->combat.active = false;
+  if (tui) tui->combat_mode = false;
   if (game->player.hp <= 0) {
-    printf("\n%s이(가) 쓰러지고 길은 어둠에 잠깁니다.\n", game->player.name);
+    printf("%s이(가) 쓰러지고 길은 어둠에 잠깁니다.", game->player.name);
     game->running = false;
     return BATTLE_RESULT_DEFEAT;
   }
-  printf("\n%s이(가) 쓰러졌습니다.\n", game->combat.enemy.name);
+  printf("%s이(가) 쓰러졌습니다.", game->combat.enemy.name);
   if (game->combat.enemy.is_elite) {
-    printf("★ 정예 적 격파! 추가 보상을 받았습니다. ★\n");
+    printf("★ 정예 적 격파! 추가 보상을 받았습니다. ★");
   }
   award_post_battle_loot(game, &game->combat.enemy, game->player.zone);
   return BATTLE_RESULT_VICTORY;

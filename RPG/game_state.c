@@ -18,8 +18,16 @@ void push_event(GameState *game, const char *fmt, ...) {
 }
 void flush_events(GameState *game) {
   int index;
+  char line[MAX_EVENT_TEXT + 16];
+  TuiState *tui = tui_get_global();
   for (index = 0; index < game->event_count; index++) {
-    printf("[세계] %s\n", game->events[index]);
+    snprintf(line, sizeof(line), "[세계] %s", game->events[index]);
+    if (tui && tui->initialized) {
+      tui_append_log(tui, line);
+    } else {
+      fputs(line, stdout);
+      fputc('\n', stdout);
+    }
   }
   game->event_count = 0;
 }
@@ -192,6 +200,9 @@ static void process_ready_tasks(GameState *game) {
   while (safety < 256 && Feather_step(&game->feather)) {
     safety++;
   }
+}
+void tick_game_tasks(GameState *game) {
+  process_ready_tasks(game);
 }
 void advance_time(GameState *game, int minutes) {
   game->clock_ms += minutes_to_ms(minutes);

@@ -220,11 +220,11 @@ void show_quests(const GameState *game) {
   }
 }
 bool read_command(const char *prompt, char *buffer, size_t buffer_size) {
-  printf("%s", prompt);
-  fflush(stdout);
-  if (fgets(buffer, (int)buffer_size, stdin) == NULL) {
-    return false;
-  }
-  buffer[strcspn(buffer, "\n")] = '\0';
-  return true;
+  /* Legacy blocking readline — no longer used by the real-time main loop.
+   * Combat uses its own ncurses input routine (see game_combat.c).
+   * Retained to satisfy the declaration in game_shared.h. */
+  (void)prompt;
+  (void)buffer;
+  (void)buffer_size;
+  return false;
 }
