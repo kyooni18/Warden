@@ -724,7 +724,7 @@ bool load_game(GameState *game, const char *path) {
   }
   fclose(file);
   if (data.magic != SAVE_MAGIC ||
-      (data.version != SAVE_VERSION && data.version != 3u)) {
+      data.version < SAVE_VERSION_MIN || data.version > SAVE_VERSION) {
     return false;
   }
   if (data.weather < 0 || data.weather >= WEATHER_COUNT ||

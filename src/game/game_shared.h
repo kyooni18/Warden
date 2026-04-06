@@ -35,6 +35,7 @@
 #define SAVE_FILE_PATH "savegame.dat"
 #define SAVE_MAGIC 0x52504753u
 #define SAVE_VERSION 4u
+#define SAVE_VERSION_MIN 3u
 #define ZONE_NONE (-1)
 typedef enum ZoneId {
   ZONE_EMBERFALL_GATE = 0,
