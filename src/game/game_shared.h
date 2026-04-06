@@ -30,9 +30,11 @@
 #define MAX_EVENTS 24
 #define MAX_EVENT_TEXT 256
 #define MAX_NAME 48
+#define MAX_WORLD_EVENTS 8
+#define MAX_MINI_QUESTS 3
 #define SAVE_FILE_PATH "savegame.dat"
 #define SAVE_MAGIC 0x52504753u
-#define SAVE_VERSION 3u
+#define SAVE_VERSION 4u
 #define ZONE_NONE (-1)
 typedef enum ZoneId {
   ZONE_EMBERFALL_GATE = 0,
@@ -103,6 +105,19 @@ typedef enum BattleResult {
   BATTLE_RESULT_FLED = 1,
   BATTLE_RESULT_DEFEAT = 2
 } BattleResult;
+typedef enum EventCategory {
+  EVENT_CATEGORY_WEATHER = 0,
+  EVENT_CATEGORY_THREAT = 1,
+  EVENT_CATEGORY_ECONOMY = 2,
+  EVENT_CATEGORY_NPC = 3,
+  EVENT_CATEGORY_MYSTIC = 4
+} EventCategory;
+typedef enum MiniQuestType {
+  MINIQUEST_NONE = 0,
+  MINIQUEST_HERB = 1,
+  MINIQUEST_ORE = 2,
+  MINIQUEST_HUNT = 3
+} MiniQuestType;
 typedef struct ZoneData {
   const char *name;
   const char *short_name;
@@ -176,6 +191,31 @@ typedef struct CombatState {
   int player_bleed_turns;
   Enemy enemy;
 } CombatState;
+typedef struct WorldEvent {
+  bool active;
+  EventCategory category;
+  int zone;
+  int intensity;
+  int expires_day;
+  char text[96];
+} WorldEvent;
+typedef struct NpcRelationship {
+  int favor;
+  int trust;
+  int reputation;
+} NpcRelationship;
+typedef struct MiniQuest {
+  bool active;
+  bool completed;
+  MiniQuestType type;
+  int zone;
+  int target;
+  int progress;
+  int reward_gold;
+  int reward_xp;
+  int expires_day;
+  char summary[96];
+} MiniQuest;
 typedef struct GameState {
   struct Feather feather;
   uint64_t clock_ms;
@@ -187,6 +227,14 @@ typedef struct GameState {
   int caravan_zone;
   char rumor[MAX_EVENT_TEXT];
   char events[MAX_EVENTS][MAX_EVENT_TEXT];
+  WorldEvent world_events[MAX_WORLD_EVENTS];
+  int world_event_count;
+  NpcRelationship npc_rel[ZONE_COUNT];
+  MiniQuest mini_quests[MAX_MINI_QUESTS];
+  int miniquest_generation_day;
+  int battle_xp_bonus_pct;
+  int battle_gold_bonus_flat;
+  int travel_risk_bonus_pct;
   Player player;
   CombatState combat;
   QuestStage remedy_quest;
@@ -217,6 +265,11 @@ typedef struct SaveData {
   int port_potions;
   int caravan_zone;
   char rumor[MAX_EVENT_TEXT];
+  WorldEvent world_events[MAX_WORLD_EVENTS];
+  int world_event_count;
+  NpcRelationship npc_rel[ZONE_COUNT];
+  MiniQuest mini_quests[MAX_MINI_QUESTS];
+  int miniquest_generation_day;
   Player player;
   int remedy_quest;
   int caravan_quest;
@@ -256,6 +309,12 @@ void show_exits(int zone);
 int player_attack_value(const GameState *game);
 int player_defense_value(const GameState *game);
 void refresh_rumor(GameState *game);
+int npc_favor(const GameState *game, int zone);
+void adjust_npc_favor(GameState *game, int zone, int delta);
+int world_event_intensity(const GameState *game, int zone, EventCategory category);
+void progress_miniquests_resource(GameState *game, ResourceId resource, int amount);
+void progress_miniquests_hunt(GameState *game, int zone);
+void ensure_miniquests(GameState *game);
 void advance_time(GameState *game, int minutes);
 void tick_game_tasks(GameState *game);
 void select_class(GameState *game, PlayerClass cls);

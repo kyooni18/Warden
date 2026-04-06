@@ -51,6 +51,18 @@ static const char *current_objective(const struct GameState *game)
     if (!game->citadel_warden_defeated) return "목표: 성채 해방 및 잔여 위협 제거";
     return "목표: 세계 안정화 및 생존자 지원";
 }
+static int count_active_miniquests(const struct GameState *game) {
+    int i;
+    int count = 0;
+    for (i = 0; i < MAX_MINI_QUESTS; i++) {
+        if (game->mini_quests[i].active &&
+            !game->mini_quests[i].completed &&
+            game->mini_quests[i].expires_day >= current_day(game)) {
+            count++;
+        }
+    }
+    return count;
+}
 
 /* ---- Internal: compute layout from current terminal dimensions ---- */
 static void compute_layout(TuiState *tui)
@@ -504,6 +516,19 @@ void tui_draw_info(TuiState *tui, const struct GameState *game)
             mvwprintw(w, y++, cols / 2, "파멸: %d/12", game->doom);
             wattroff(w, COLOR_PAIR(doom_cp));
         }
+        if (y < rows - 2) {
+            mvwprintw(w, y++, 1, "관계: %s 호감 %d",
+                      kZones[game->player.zone].short_name,
+                      npc_favor(game, game->player.zone));
+        }
+        if (y < rows - 2) {
+            int active_events = game->world_event_count;
+            int active_mq = count_active_miniquests(game);
+            wattron(w, COLOR_PAIR(CP_WORLD));
+            mvwprintw(w, y++, 1, "세계상태: 이벤트 %d | 의뢰 %d",
+                      active_events, active_mq);
+            wattroff(w, COLOR_PAIR(CP_WORLD));
+        }
 
         /* Attack / Defense */
         if (y < rows - 2) {
@@ -592,9 +617,28 @@ void tui_draw_info(TuiState *tui, const struct GameState *game)
                 mvwprintw(w, y++, 1, "%.30s", current_objective(game));
                 wattroff(w, COLOR_PAIR(CP_XP));
             }
+            if (y < rows - 2 && count_active_miniquests(game) > 0) {
+                int i;
+                for (i = 0; i < MAX_MINI_QUESTS && y < rows - 2; i++) {
+                    const MiniQuest *mq = &game->mini_quests[i];
+                    if (!mq->active || mq->completed ||
+                        mq->expires_day < current_day(game)) {
+                        continue;
+                    }
+                    wattron(w, COLOR_PAIR(CP_GOLD));
+                    mvwprintw(w, y++, 1, "의뢰 %d/%d D-%d",
+                              mq->progress, mq->target,
+                              mq->expires_day - current_day(game));
+                    wattroff(w, COLOR_PAIR(CP_GOLD));
+                    if (y < rows - 2) {
+                        mvwprintw(w, y++, 1, "%.28s", mq->summary);
+                    }
+                    break;
+                }
+            }
             if (y < rows - 2) {
                 wattron(w, COLOR_PAIR(CP_DIM) | A_DIM);
-                mvwaddstr(w, y++, 1, "힌트: interact / buy / sell / craft");
+                mvwaddstr(w, y++, 1, "힌트: quests / rumor / interact");
                 wattroff(w, COLOR_PAIR(CP_DIM) | A_DIM);
             }
         }
