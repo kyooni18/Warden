@@ -278,14 +278,18 @@ BattleResult run_battle(GameState *game, Enemy enemy);
 /* ---- game_actions.c ---- */
 void use_potion_outside_combat(GameState *game);
 void use_holy_water_outside_combat(GameState *game);
+void use_relic_dust_outside_combat(GameState *game);
 void hunt_current_zone(GameState *game);
 void scout_zone(GameState *game);
 void gather_resources(GameState *game);
 void explore_special_location(GameState *game);
+void interact_here(GameState *game);
 void talk_here(GameState *game);
 void shop_here(GameState *game);
 void forge_here(GameState *game);
 void rest_here(GameState *game);
+bool handle_trade_command(GameState *game, const char *command);
+bool handle_craft_command(GameState *game, const char *command);
 bool maybe_handle_movement_command(GameState *game, const char *command);
 
 /* ---- Route printf through the TUI log ----

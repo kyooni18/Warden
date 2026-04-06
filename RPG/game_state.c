@@ -261,6 +261,39 @@ static void task_rumor(void *context) {
   refresh_rumor(game);
   push_event(game, "새 소문: %s", game->rumor);
 }
+static void task_patrol(void *context) {
+  GameState *game = (GameState *)context;
+  int zone = roll_range(0, ZONE_COUNT - 1);
+  if (!game->player.discovered[zone]) {
+    return;
+  }
+  if (kZones[zone].safe) {
+    push_event(game, "순찰 보고: %s 경계선은 안정적입니다.", kZones[zone].name);
+    return;
+  }
+  if (roll_range(0, 99) < 45) {
+    game->doom = clamp_int(game->doom + 1, 0, 12);
+    push_event(game, "순찰 경보: %s에서 공허 기운이 증폭되었습니다. 파멸도 +1.",
+               kZones[zone].name);
+  } else {
+    push_event(game, "순찰 보고: %s에서 적 동향이 포착됐지만 즉시 위협은 아닙니다.",
+               kZones[zone].name);
+  }
+}
+static void task_npc_aid(void *context) {
+  GameState *game = (GameState *)context;
+  if (!kZones[game->player.zone].safe) {
+    return;
+  }
+  if (roll_range(0, 99) < 35) {
+    game->player.potions++;
+    push_event(game, "현지 지원대가 %s에게 응급 포션 1개를 전달했습니다.",
+               game->player.name);
+  } else if (roll_range(0, 99) < 50) {
+    game->player.relic_dust++;
+    push_event(game, "학자 길드가 정제한 유물 가루 1개를 전달했습니다.");
+  }
+}
 static bool enqueue_repeating_task(GameState *game, void (*task)(void *),
                                    int start_minutes, int repeat_minutes,
                                    uint8_t priority) {
@@ -306,6 +339,10 @@ void init_game(GameState *game) {
   enqueue_repeating_task(game, task_doom, 1440, 1440,
                          FSScheduler_Priority_INTERACTIVE);
   enqueue_repeating_task(game, task_rumor, 240, 240,
+                         FSScheduler_Priority_BACKGROUND);
+  enqueue_repeating_task(game, task_patrol, 150, 150,
+                         FSScheduler_Priority_INTERACTIVE);
+  enqueue_repeating_task(game, task_npc_aid, 210, 210,
                          FSScheduler_Priority_BACKGROUND);
   refresh_rumor(game);
 }
@@ -462,6 +499,10 @@ bool load_game(GameState *game, const char *path) {
   enqueue_repeating_task(game, task_doom, 1440, 1440,
                          FSScheduler_Priority_INTERACTIVE);
   enqueue_repeating_task(game, task_rumor, 240, 240,
+                         FSScheduler_Priority_BACKGROUND);
+  enqueue_repeating_task(game, task_patrol, 150, 150,
+                         FSScheduler_Priority_INTERACTIVE);
+  enqueue_repeating_task(game, task_npc_aid, 210, 210,
                          FSScheduler_Priority_BACKGROUND);
   if (is_blank(game->rumor)) {
     refresh_rumor(game);
