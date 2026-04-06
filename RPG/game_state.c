@@ -252,16 +252,16 @@ static void task_rumor(void *context) {
 }
 static bool enqueue_repeating_task(GameState *game, void (*task)(void *),
                                    int start_minutes, int repeat_minutes,
-                                   int8_t priority) {
-  return Feather_add_task(
+                                   uint8_t priority) {
+  return Feather_add_repeating_task(
       &game->feather,
-      (FSTask){.task = task,
-               .context = game,
-               .start_time = game->clock_ms + minutes_to_ms(start_minutes),
-               .regular = true,
-               .execute_cycle = minutes_to_ms(repeat_minutes),
-               .priority = priority,
-               .repeat_mode = FSTask_Repeat_FIXED_DELAY});
+      (FSSchedulerRepeatingTask){
+          .task = task,
+          .context = game,
+          .start_time = game->clock_ms + minutes_to_ms(start_minutes),
+          .execute_cycle = minutes_to_ms(repeat_minutes),
+          .priority = priority,
+          .repeat_mode = FSSchedulerTaskRepeat_FIXEDDELAY});
 }
 void init_game(GameState *game) {
   memset(game, 0, sizeof(*game));
