@@ -74,6 +74,9 @@ void tui_draw_info(TuiState *tui, const struct GameState *game);
 void tui_draw_log(TuiState *tui);
 void tui_draw_input(TuiState *tui, const char *prompt, const char *buf, int buf_len);
 void tui_draw_combat_overlay(TuiState *tui, const struct GameState *game);
+/* Travel animation overlay shown when moving between zones (~600 ms). */
+void tui_draw_travel_animation(TuiState *tui, const struct GameState *game,
+                               int dest_zone);
 
 /* Helper: draw a filled/empty progress bar inside window win. */
 void tui_draw_bar(WINDOW *win, int y, int x, int w,

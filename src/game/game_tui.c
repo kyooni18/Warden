@@ -33,6 +33,157 @@
 #define MAP_STRIDE   10   /* cell + connector width (except last) */
 #define MAP_INNER_W  38   /* 4*8 + 3*2                            */
 #define MAP_COLS     40   /* MAP_INNER_W + 2 (box border)         */
+#define MAP_GRID_ROWS 8   /* total grid rows (8×4 = 32 zones)     */
+#define MAP_VIEWPORT  6   /* visible rows shown at a time         */
+
+/* ---- ASCII art for travel animation ---- */
+#define ZONE_ART_LINES 6
+
+typedef enum {
+    ZONE_ART_TOWN = 0,
+    ZONE_ART_FOREST,
+    ZONE_ART_CAVE,
+    ZONE_ART_RUINS,
+    ZONE_ART_COAST,
+    ZONE_ART_VOLCANO,
+    ZONE_ART_FROST,
+    ZONE_ART_VOID,
+    ZONE_ART_MARSH,
+    ZONE_ART_MOUNTAIN,
+    ZONE_ART_COUNT
+} ZoneArtId;
+
+static const char *kZoneArt[ZONE_ART_COUNT][ZONE_ART_LINES] = {
+    /* ZONE_ART_TOWN */
+    {
+        "   _____  _____   ",
+        "  |  _  ||  _  |  ",
+        "  | |_| || |_| |  ",
+        "  |  _  ||  _  |  ",
+        "  |_| |_||_| |_|  ",
+        "    |         |   ",
+    },
+    /* ZONE_ART_FOREST */
+    {
+        "  @ Y @ @ Y @ @   ",
+        "   Y|Y   Y|Y      ",
+        " --+-------+--    ",
+        "   Y|Y   Y|Y      ",
+        "  @ Y @ @ Y @ @   ",
+        "~~~~~~~~~~~~~~~~~~",
+    },
+    /* ZONE_ART_CAVE */
+    {
+        "      _______     ",
+        "     | ##:## |    ",
+        "     |:#:.## |    ",
+        "     |##:.:# |    ",
+        "     |_______|    ",
+        "      | | | |     ",
+    },
+    /* ZONE_ART_RUINS */
+    {
+        "  _||_    _||_    ",
+        " |    |  |    |   ",
+        " |    |  |    |   ",
+        " |____|  |____|   ",
+        "  ####    ####    ",
+        "   ##      ##     ",
+    },
+    /* ZONE_ART_COAST */
+    {
+        "  ~~   ~~   ~~    ",
+        " ~~~~~~ ~~~~~     ",
+        "  |~~~~~~~~~~~|   ",
+        "  |___________|   ",
+        "   ~~  ~~~  ~~    ",
+        "    ~~   ~~  ~    ",
+    },
+    /* ZONE_ART_VOLCANO */
+    {
+        "      ..*..       ",
+        "     .#*!*#.      ",
+        "    .#######.     ",
+        "   .#########.    ",
+        "  .###########.   ",
+        "  *. * * * .*     ",
+    },
+    /* ZONE_ART_FROST */
+    {
+        "  *   +   *   +   ",
+        " *  . | . + . |   ",
+        "+-+---+---+--+-+  ",
+        " *  . | . + . |   ",
+        "  *   +   *   +   ",
+        "~~~~~~~~~~~~~~~~~~ ",
+    },
+    /* ZONE_ART_VOID */
+    {
+        "  .  *    .  *    ",
+        " *  . [o] .  *    ",
+        " .   [X]   .      ",
+        " *  . [o] .  *    ",
+        "  .  *    .  *    ",
+        "  *  ~~~~~  *     ",
+    },
+    /* ZONE_ART_MARSH */
+    {
+        "  ,-.  ,-.  ,-.   ",
+        " ( ~ )( ~ )( ~ )  ",
+        "  `-'  `-'  `-'   ",
+        "  ~ *  ~ *  ~ *   ",
+        "   ~~~*~~~*~~~     ",
+        "~~~~~~~~~~~~~~~~~~",
+    },
+    /* ZONE_ART_MOUNTAIN */
+    {
+        "         .        ",
+        "        . .       ",
+        "       .   .      ",
+        "      . . . .     ",
+        "     .       .    ",
+        "    ._________.   ",
+    },
+};
+
+static ZoneArtId zone_art_type(int zone_id)
+{
+    switch (zone_id) {
+    case ZONE_EMBERFALL_GATE:
+    case ZONE_BRASS_MARKET:
+    case ZONE_LANTERN_WARD:
+    case ZONE_VERDANT_ABBEY:
+    case ZONE_ANCIENT_BEACON:
+    case ZONE_LIGHT_SPIRE:
+    case ZONE_WANDERER_HAVEN:   return ZONE_ART_TOWN;
+    case ZONE_IRONWOOD_PASS:
+    case ZONE_MOONFEN:
+    case ZONE_CINDER_GROVE:
+    case ZONE_DEEPWOOD_HOLLOW:
+    case ZONE_ECHO_SHORE:
+    case ZONE_CRIMSON_DELTA:
+    case ZONE_TIDE_CAVERN:      return ZONE_ART_FOREST;
+    case ZONE_ASHEN_QUARRY:
+    case ZONE_IRON_CITADEL:
+    case ZONE_SILVER_SUMMIT:    return ZONE_ART_CAVE;
+    case ZONE_WHISPER_LIBRARY:
+    case ZONE_SUNKEN_ARCHIVE:
+    case ZONE_RUINED_BASILICA:
+    case ZONE_SHATTERED_VAULT:
+    case ZONE_BONE_TOMB:
+    case ZONE_VOID_SPIRE:       return ZONE_ART_RUINS;
+    case ZONE_STORMWATCH_CLIFFS:
+    case ZONE_GLOAM_PORT:       return ZONE_ART_COAST;
+    case ZONE_OBSIDIAN_CRATER:
+    case ZONE_MAGMA_RIFT:
+    case ZONE_EMBER_WASTES:
+    case ZONE_ASHEN_DESOLATION: return ZONE_ART_VOLCANO;
+    case ZONE_FROSTSPIRE_TRAIL: return ZONE_ART_FROST;
+    case ZONE_HOLLOW_THRONE:
+    case ZONE_ABYSS_MOUTH:      return ZONE_ART_VOID;
+    default:                    return ZONE_ART_TOWN;
+    }
+}
 
 /* ---- Global TUI pointer ---- */
 static TuiState *g_tui = NULL;
@@ -290,19 +441,28 @@ void tui_draw_map(TuiState *tui, const struct GameState *game)
     werase(w);
     box(w, 0, 0);
 
-    /* Panel title */
+    /* Scrollable viewport: show MAP_VIEWPORT rows centred on the player. */
+    int player_grid_row = game->player.zone / 4;
+    int vp_start = player_grid_row - (MAP_VIEWPORT / 2);
+    if (vp_start < 0) vp_start = 0;
+    if (vp_start + MAP_VIEWPORT > MAP_GRID_ROWS)
+        vp_start = MAP_GRID_ROWS - MAP_VIEWPORT;
+
+    /* Panel title with row indicator */
     wattron(w, COLOR_PAIR(CP_ZONE) | A_BOLD);
-    mvwaddstr(w, 0, 2, " 세계 지도 ");
+    mvwprintw(w, 0, 2, " 세계 지도 [%d-%d행/%d] ",
+              vp_start + 1, vp_start + MAP_VIEWPORT, MAP_GRID_ROWS);
     wattroff(w, COLOR_PAIR(CP_ZONE) | A_BOLD);
 
     int row, col;
-    for (row = 0; row < 6; row++) {
-        int y = 1 + row * 2; /* 2 display rows per grid row (cells + connectors) */
+    for (row = vp_start; row < vp_start + MAP_VIEWPORT; row++) {
+        int y = 1 + (row - vp_start) * 2; /* 2 display rows per grid row */
         if (y >= tui->upper_rows - 1) break;
 
         for (col = 0; col < 4; col++) {
             int zone_id = row * 4 + col;
-            /* x: col 1 (border), then col*MAP_STRIDE for each cell */
+            if (zone_id >= ZONE_COUNT) continue;
+
             int x = 1 + col * MAP_STRIDE;
             if (x + MAP_CELL_W >= tui->map_cols - 1) break;
 
@@ -330,14 +490,15 @@ void tui_draw_map(TuiState *tui, const struct GameState *game)
             }
         }
 
-        /* Vertical connectors between grid rows */
-        if (row < 5 && y + 1 < tui->upper_rows - 1) {
+        /* Vertical connectors to the row below (within viewport) */
+        if (row < vp_start + MAP_VIEWPORT - 1 && y + 1 < tui->upper_rows - 1) {
             for (col = 0; col < 4; col++) {
-                int zone_id = row * 4 + col;
+                int zone_id       = row * 4 + col;
+                int zone_id_south = zone_id + 4;
+                if (zone_id >= ZONE_COUNT || zone_id_south >= ZONE_COUNT) continue;
                 bool top = game->player.discovered[zone_id];
-                bool bot = game->player.discovered[zone_id + 4];
+                bool bot = game->player.discovered[zone_id_south];
                 if (!top && !bot) continue;
-                /* Draw connector at horizontal centre of the cell */
                 int cx = 1 + col * MAP_STRIDE + MAP_CELL_W / 2;
                 if (cx < tui->map_cols - 1) {
                     wattron(w, COLOR_PAIR(CP_DIM) | A_DIM);
@@ -788,6 +949,111 @@ static void tui_draw_header(TuiState *tui)
     mvwaddstr(w, 0, tx, title);
     wattroff(w, COLOR_PAIR(CP_HEADER) | A_BOLD | A_REVERSE);
     wnoutrefresh(w);
+}
+
+/* ---- tui_draw_travel_animation ---- */
+/* Draws a centred overlay with zone ASCII art and an animated progress bar.
+ * The overlay remains visible for ~600 ms (6 steps × 100 ms) so the player
+ * feels travel time passing before the new zone description is printed. */
+void tui_draw_travel_animation(TuiState *tui, const struct GameState *game,
+                               int dest_zone)
+{
+    const int BOX_H = 12;
+    const int BOX_W = 44;
+    const int STEPS = 6;
+    int step, l, i;
+    int box_h = BOX_H;
+    int box_w = BOX_W;
+
+    if (!tui || !tui->initialized) return;
+    if (dest_zone < 0 || dest_zone >= ZONE_COUNT) return;
+
+    /* Clamp box to available space */
+    if (box_h > tui->visible_rows) box_h = tui->visible_rows;
+    if (box_w > tui->cols) box_w = tui->cols;
+
+    int wy = (tui->visible_rows - box_h) / 2;
+    int wx = (tui->cols - box_w) / 2;
+    if (wy < 0) wy = 0;
+    if (wx < 0) wx = 0;
+
+    WINDOW *win = newwin(box_h, box_w, wy, wx);
+    if (!win) return;
+
+    ZoneArtId art_id = zone_art_type(dest_zone);
+    int bar_w = box_w - 6;
+    if (bar_w < 2) bar_w = 2;
+
+    for (step = 0; step <= STEPS; step++) {
+        werase(win);
+        box(win, 0, 0);
+
+        /* Title: destination zone name */
+        wattron(win, COLOR_PAIR(CP_ZONE) | A_BOLD);
+        mvwprintw(win, 0, 2, " -> %.30s ", kZones[dest_zone].name);
+        wattroff(win, COLOR_PAIR(CP_ZONE) | A_BOLD);
+
+        /* Zone danger indicator in top-right corner */
+        {
+            int danger = kZones[dest_zone].safe ? 0 : kZones[dest_zone].danger;
+            int cp = danger <= 2 ? CP_HP_GOOD : (danger <= 5 ? CP_HP_MED : CP_HP_LOW);
+            wattron(win, COLOR_PAIR(cp));
+            mvwprintw(win, 0, box_w - 8, " 위험:%d ", danger);
+            wattroff(win, COLOR_PAIR(cp));
+        }
+
+        /* ASCII art lines centred in the box */
+        for (l = 0; l < ZONE_ART_LINES; l++) {
+            int art_y = 2 + l;
+            if (art_y >= box_h - 3) break;
+            {
+                const char *line = kZoneArt[art_id][l];
+                int llen = (int)strlen(line);
+                int art_x = (box_w - llen) / 2;
+                if (art_x < 1) art_x = 1;
+                wattron(win, COLOR_PAIR(CP_DIM));
+                mvwaddnstr(win, art_y, art_x, line, box_w - art_x - 1);
+                wattroff(win, COLOR_PAIR(CP_DIM));
+            }
+        }
+
+        /* "Travelling..." label */
+        if (box_h >= 11) {
+            wattron(win, COLOR_PAIR(CP_WORLD));
+            mvwaddstr(win, box_h - 3, 2, "이동 중...");
+            wattroff(win, COLOR_PAIR(CP_WORLD));
+        }
+
+        /* Animated progress bar */
+        {
+            int filled = (bar_w * step) / STEPS;
+            for (i = 0; i < bar_w; i++) {
+                if (i < filled) {
+                    wattron(win, COLOR_PAIR(CP_ZONE) | A_BOLD);
+                    mvwaddch(win, box_h - 2, 3 + i, ACS_BLOCK);
+                    wattroff(win, COLOR_PAIR(CP_ZONE) | A_BOLD);
+                } else {
+                    wattron(win, COLOR_PAIR(CP_DIM) | A_DIM);
+                    mvwaddch(win, box_h - 2, 3 + i, ACS_CKBOARD);
+                    wattroff(win, COLOR_PAIR(CP_DIM) | A_DIM);
+                }
+            }
+        }
+
+        wnoutrefresh(win);
+        doupdate();
+
+        if (step < STEPS) {
+            struct timespec ts;
+            ts.tv_sec  = 0;
+            ts.tv_nsec = 100000000L; /* 100 ms per step → 600 ms total */
+            nanosleep(&ts, NULL);
+        }
+    }
+
+    delwin(win);
+    /* Restore full TUI after the overlay */
+    tui_refresh_all(tui, game);
 }
 
 /* ---- tui_refresh_all ---- */

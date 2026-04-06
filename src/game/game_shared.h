@@ -34,8 +34,8 @@
 #define MAX_MINI_QUESTS 3
 #define SAVE_FILE_PATH "savegame.dat"
 #define SAVE_MAGIC 0x52504753u
-#define SAVE_VERSION 4u
-#define SAVE_VERSION_MIN 3u
+#define SAVE_VERSION 5u
+#define SAVE_VERSION_MIN 5u
 #define ZONE_NONE (-1)
 typedef enum ZoneId {
   ZONE_EMBERFALL_GATE = 0,
@@ -62,7 +62,17 @@ typedef enum ZoneId {
   ZONE_BONE_TOMB = 21,
   ZONE_LIGHT_SPIRE = 22,
   ZONE_IRON_CITADEL = 23,
-  ZONE_COUNT = 24
+  /* ---- Row 6: deep south expansion ---- */
+  ZONE_CRIMSON_DELTA = 24,
+  ZONE_VOID_SPIRE = 25,
+  ZONE_WANDERER_HAVEN = 26,
+  ZONE_EMBER_WASTES = 27,
+  /* ---- Row 7: frontier end-game zones ---- */
+  ZONE_TIDE_CAVERN = 28,
+  ZONE_ABYSS_MOUTH = 29,
+  ZONE_SILVER_SUMMIT = 30,
+  ZONE_ASHEN_DESOLATION = 31,
+  ZONE_COUNT = 32
 } ZoneId;
 typedef enum WeatherId {
   WEATHER_CLEAR = 0,

@@ -997,6 +997,13 @@ static bool move_player(GameState *game, const char *direction) {
   }
   game->player.zone = next_zone;
   game->player.discovered[next_zone] = true;
+  /* Travel animation: show ASCII art overlay for ~600 ms before arriving. */
+  {
+    TuiState *tui = tui_get_global();
+    if (tui && tui->initialized) {
+      tui_draw_travel_animation(tui, game, next_zone);
+    }
+  }
   {
     int travel_minutes = 30;
     int night_penalty = (current_hour(game) >= 22 || current_hour(game) <= 4) ? 8 : 0;
