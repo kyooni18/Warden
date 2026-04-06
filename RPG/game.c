@@ -4,11 +4,13 @@
 #include "game_shared.h"
 
 /* ---- SIGWINCH handler for terminal resize ---- */
+#ifdef SIGWINCH
 static volatile sig_atomic_t g_resize_pending = 0;
 static void handle_sigwinch(int sig) {
   (void)sig;
   g_resize_pending = 1;
 }
+#endif
 
 /* ---- Startup: class and name selection via ncurses ---- */
 static void startup_screen(GameState *game, TuiState *tui)
@@ -272,7 +274,9 @@ int rpg_run(void)
   tui_set_global(&tui);
 
   /* Register resize handler */
+#ifdef SIGWINCH
   signal(SIGWINCH, handle_sigwinch);
+#endif
 
   /* Startup class/name selection */
   startup_screen(&game, &tui);
@@ -287,10 +291,12 @@ int rpg_run(void)
 
   while (game.running) {
     /* Handle terminal resize */
+#ifdef SIGWINCH
     if (g_resize_pending) {
       g_resize_pending = 0;
       tui_handle_resize(&tui);
     }
+#endif
 
     /* Advance game clock with elapsed wall time */
     uint64_t now = wall_ms();
