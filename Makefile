@@ -5,6 +5,7 @@ BUILD_DIR ?= build
 .PHONY: configure build feather rpg run-rpg clean
 
 configure:
+	git submodule update --init --recursive
 	cmake -S . -B $(BUILD_DIR)
 
 build: configure
