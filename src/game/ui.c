@@ -90,6 +90,8 @@ void show_stats(const GameState *game) {
          game->player.gold, game->doom);
   printf("공격력 %d | 방어력 %d | 승리 %d\n", player_attack_value(game),
          player_defense_value(game), game->player.victories);
+  printf("현지 관계(%s): 호감 %d\n", kZones[game->player.zone].name,
+         npc_favor(game, game->player.zone));
   if (game->player.player_class == CLASS_MAGE) {
     printf("룬 파편: %d개\n", game->player.rune_shards);
   }
@@ -147,6 +149,7 @@ void show_time(const GameState *game) {
          kWeatherNames[game->weather]);
 }
 void show_quests(const GameState *game) {
+  int i;
   printf("\n퀘스트 기록\n");
   if (game->remedy_quest == QUEST_ACTIVE) {
     printf("  수녀의 치료제: 청록 수도원의 엘로웬 수녀에게 약초 3개 전달 (%d개 보유)\n",
@@ -221,6 +224,23 @@ void show_quests(const GameState *game) {
     printf("  성채 해방: 완료\n");
   } else {
     printf("  성채 해방: 미수락 (빛의 첨탑의 사서 에반에게 대화)\n");
+  }
+  printf("  --- 순환 의뢰 ---\n");
+  for (i = 0; i < MAX_MINI_QUESTS; i++) {
+    const MiniQuest *mq = &game->mini_quests[i];
+    if (!mq->active) {
+      continue;
+    }
+    if (mq->completed) {
+      printf("  [완료] %s\n", mq->summary);
+      continue;
+    }
+    if (mq->expires_day < current_day(game)) {
+      printf("  [만료] %s\n", mq->summary);
+      continue;
+    }
+    printf("  [진행] %s (%d/%d, %d일차 만료)\n", mq->summary, mq->progress,
+           mq->target, mq->expires_day);
   }
 }
 bool read_command(const char *prompt, char *buffer, size_t buffer_size) {

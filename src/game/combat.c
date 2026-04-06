@@ -413,8 +413,25 @@ static int compute_damage(int attack_value, int defense_value) {
 }
 static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone) {
   int bonus_gold = 0;
-  game->player.gold += enemy->gold_reward;
-  grant_xp(game, enemy->xp_reward);
+  int xp_reward = enemy->xp_reward;
+  int gold_reward = enemy->gold_reward;
+  int danger_event =
+      world_event_intensity(game, zone, EVENT_CATEGORY_THREAT);
+  if (game->weather == WEATHER_FOG) {
+    xp_reward += 2 + game->player.level / 2;
+  }
+  if (danger_event > 0) {
+    xp_reward += danger_event;
+    gold_reward += danger_event;
+  }
+  if (game->battle_xp_bonus_pct > 0) {
+    xp_reward += (xp_reward * game->battle_xp_bonus_pct) / 100;
+  }
+  if (game->battle_gold_bonus_flat > 0) {
+    gold_reward += game->battle_gold_bonus_flat;
+  }
+  game->player.gold += gold_reward;
+  grant_xp(game, xp_reward);
   game->player.victories++;
   if (zone == ZONE_MOONFEN || zone == ZONE_CINDER_GROVE ||
       zone == ZONE_DEEPWOOD_HOLLOW || zone == ZONE_ECHO_SHORE) {
@@ -447,8 +464,8 @@ static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone
   if (bonus_gold > 0) {
     game->player.gold += bonus_gold;
   }
-  printf("보상: 경험치 %d, 골드 %d.\n", enemy->xp_reward,
-         enemy->gold_reward + bonus_gold);
+  printf("보상: 경험치 %d, 골드 %d.\n", xp_reward,
+         gold_reward + bonus_gold);
 }
 /* ---- Non-blocking combat input ----
  * Waits for a keypress (or typed command + Enter).  Single-key shortcuts

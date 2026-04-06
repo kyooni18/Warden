@@ -34,6 +34,22 @@ void flush_events(GameState *game) {
 static int total_minutes_elapsed(const GameState *game) {
   return (int)(game->clock_ms / GAME_MINUTE_MS);
 }
+static int clamp_zone(int zone) {
+  if (zone < 0 || zone >= ZONE_COUNT) {
+    return ZONE_EMBERFALL_GATE;
+  }
+  return zone;
+}
+int npc_favor(const GameState *game, int zone) {
+  int z = clamp_zone(zone);
+  return game->npc_rel[z].favor;
+}
+void adjust_npc_favor(GameState *game, int zone, int delta) {
+  int z = clamp_zone(zone);
+  game->npc_rel[z].favor = clamp_int(game->npc_rel[z].favor + delta, 0, 100);
+  game->npc_rel[z].trust = clamp_int(game->npc_rel[z].trust + delta / 2, 0, 100);
+  game->npc_rel[z].reputation = clamp_int(game->npc_rel[z].reputation + delta / 3, 0, 100);
+}
 int current_day(const GameState *game) {
   return total_minutes_elapsed(game) / 1440 + 1;
 }
@@ -81,7 +97,7 @@ static int zone_north(int zone) {
   return zone >= 4 ? zone - 4 : ZONE_NONE;
 }
 static int zone_south(int zone) {
-  return zone < 20 ? zone + 4 : ZONE_NONE;
+  return (zone + 4 < ZONE_COUNT) ? zone + 4 : ZONE_NONE;
 }
 static int zone_west(int zone) {
   return zone % 4 != 0 ? zone - 1 : ZONE_NONE;
@@ -145,7 +161,110 @@ int player_defense_value(const GameState *game) {
 static void fill_rumor(GameState *game, const char *text) {
   snprintf(game->rumor, sizeof(game->rumor), "%s", text);
 }
+static int event_power_scale(const GameState *game) {
+  return 1 + game->player.level / 3 + game->doom / 4;
+}
+static const char *event_category_name(EventCategory category) {
+  switch (category) {
+  case EVENT_CATEGORY_WEATHER:
+    return "기상";
+  case EVENT_CATEGORY_THREAT:
+    return "위협";
+  case EVENT_CATEGORY_ECONOMY:
+    return "교역";
+  case EVENT_CATEGORY_NPC:
+    return "인물";
+  case EVENT_CATEGORY_MYSTIC:
+    return "비전";
+  default:
+    return "세계";
+  }
+}
+static int active_world_event_index(const GameState *game, EventCategory category,
+                                    int zone) {
+  int i;
+  for (i = 0; i < MAX_WORLD_EVENTS; i++) {
+    if (game->world_events[i].active &&
+        game->world_events[i].category == category &&
+        game->world_events[i].zone == zone) {
+      return i;
+    }
+  }
+  return -1;
+}
+static void clear_expired_world_events(GameState *game) {
+  int i;
+  int day = current_day(game);
+  game->world_event_count = 0;
+  for (i = 0; i < MAX_WORLD_EVENTS; i++) {
+    if (!game->world_events[i].active) {
+      continue;
+    }
+    if (game->world_events[i].expires_day < day) {
+      game->world_events[i].active = false;
+      continue;
+    }
+    game->world_event_count++;
+  }
+}
+static void add_world_event(GameState *game, EventCategory category, int zone,
+                            int intensity, int duration_days,
+                            const char *text_fmt, ...) {
+  int i;
+  int slot = -1;
+  va_list args;
+  char msg[96];
+  for (i = 0; i < MAX_WORLD_EVENTS; i++) {
+    if (!game->world_events[i].active) {
+      slot = i;
+      break;
+    }
+  }
+  if (slot == -1) {
+    int oldest = 0;
+    for (i = 1; i < MAX_WORLD_EVENTS; i++) {
+      if (game->world_events[i].expires_day <
+          game->world_events[oldest].expires_day) {
+        oldest = i;
+      }
+    }
+    slot = oldest;
+  }
+  va_start(args, text_fmt);
+  vsnprintf(msg, sizeof(msg), text_fmt, args);
+  va_end(args);
+  game->world_events[slot].active = true;
+  game->world_events[slot].category = category;
+  game->world_events[slot].zone = clamp_zone(zone);
+  game->world_events[slot].intensity = clamp_int(intensity, 1, 9);
+  game->world_events[slot].expires_day = current_day(game) + duration_days;
+  snprintf(game->world_events[slot].text, sizeof(game->world_events[slot].text),
+           "%s", msg);
+  clear_expired_world_events(game);
+  push_event(game, "[%s] %s", event_category_name(category), msg);
+}
+int world_event_intensity(const GameState *game, int zone,
+                          EventCategory category) {
+  int idx = active_world_event_index(game, category, zone);
+  if (idx < 0) {
+    return 0;
+  }
+  return game->world_events[idx].intensity;
+}
 void refresh_rumor(GameState *game) {
+  clear_expired_world_events(game);
+  if (game->world_event_count > 0) {
+    int idx = rand() % MAX_WORLD_EVENTS;
+    int safety = 0;
+    while (!game->world_events[idx].active && safety < MAX_WORLD_EVENTS) {
+      idx = (idx + 1) % MAX_WORLD_EVENTS;
+      safety++;
+    }
+    if (game->world_events[idx].active) {
+      fill_rumor(game, game->world_events[idx].text);
+      return;
+    }
+  }
   if (!game->bandit_reeve_defeated) {
     fill_rumor(
         game,
@@ -195,6 +314,136 @@ void refresh_rumor(GameState *game) {
       game,
       "봉화는 아직 버티지만, 모든 순찰대는 밤마다 공허 왕좌의 울림이 커진다고 말한다.");
 }
+static void maybe_spawn_conditional_event(GameState *game) {
+  int zone;
+  int power = event_power_scale(game);
+  if (roll_range(0, 99) >= 35) {
+    return;
+  }
+  zone = roll_range(0, ZONE_COUNT - 1);
+  if (!game->player.discovered[zone]) {
+    return;
+  }
+  if (kZones[zone].safe && roll_range(0, 99) < 40) {
+    add_world_event(game, EVENT_CATEGORY_ECONOMY, zone, 1 + power / 2, 1,
+                    "%s에 순회 장인이 머물며 거래 가격이 개선되었습니다.",
+                    kZones[zone].name);
+    return;
+  }
+  if (!kZones[zone].safe) {
+    add_world_event(game, EVENT_CATEGORY_THREAT, zone, 1 + power, 1,
+                    "%s에 야간 습격대가 출몰해 이동 위험이 급증했습니다.",
+                    kZones[zone].name);
+  }
+}
+static void maybe_spawn_miniquest(GameState *game) {
+  int slot;
+  int zone;
+  MiniQuest *mq = NULL;
+  if (current_day(game) == game->miniquest_generation_day) {
+    return;
+  }
+  game->miniquest_generation_day = current_day(game);
+  if (roll_range(0, 99) < 45) {
+    return;
+  }
+  for (slot = 0; slot < MAX_MINI_QUESTS; slot++) {
+    if (!game->mini_quests[slot].active ||
+        game->mini_quests[slot].expires_day < current_day(game)) {
+      mq = &game->mini_quests[slot];
+      break;
+    }
+  }
+  if (mq == NULL) {
+    return;
+  }
+  memset(mq, 0, sizeof(*mq));
+  zone = roll_range(0, ZONE_COUNT - 1);
+  mq->active = true;
+  mq->zone = zone;
+  mq->expires_day = current_day(game) + 2;
+  mq->reward_gold = 12 + game->player.level * 3;
+  mq->reward_xp = 10 + game->player.level * 2;
+  switch (roll_range(0, 2)) {
+  case 0:
+    mq->type = MINIQUEST_HERB;
+    mq->target = 2 + game->player.level / 3;
+    snprintf(mq->summary, sizeof(mq->summary),
+             "긴급 치료제: %s 인근 약초 %d개 전달", kZones[zone].short_name,
+             mq->target);
+    break;
+  case 1:
+    mq->type = MINIQUEST_ORE;
+    mq->target = 2 + game->player.level / 4;
+    snprintf(mq->summary, sizeof(mq->summary),
+             "방벽 보수: %s 인근 광석 %d개 조달", kZones[zone].short_name,
+             mq->target);
+    break;
+  default:
+    mq->type = MINIQUEST_HUNT;
+    mq->target = 1 + game->player.level / 4;
+    snprintf(mq->summary, sizeof(mq->summary),
+             "현상 수배: %s 위협체 %d회 제압", kZones[zone].short_name,
+             mq->target);
+    break;
+  }
+  add_world_event(game, EVENT_CATEGORY_NPC, zone, 1 + game->player.level / 4, 2,
+                  "현장 의뢰가 접수됨: %s", mq->summary);
+}
+void ensure_miniquests(GameState *game) {
+  maybe_spawn_miniquest(game);
+}
+static void resolve_completed_miniquests(GameState *game) {
+  int i;
+  for (i = 0; i < MAX_MINI_QUESTS; i++) {
+    MiniQuest *mq = &game->mini_quests[i];
+    if (!mq->active || mq->completed) {
+      continue;
+    }
+    if (mq->progress < mq->target) {
+      continue;
+    }
+    mq->completed = true;
+    game->player.gold += mq->reward_gold;
+    game->player.xp += mq->reward_xp;
+    if (game->player.xp >= game->player.xp_to_next) {
+      game->player.xp = game->player.xp_to_next - 1;
+    }
+    adjust_npc_favor(game, mq->zone, 8);
+    push_event(game, "현장 의뢰 완료: %s (보상 골드 %d, 경험치 %d).",
+               mq->summary, mq->reward_gold, mq->reward_xp);
+  }
+}
+void progress_miniquests_resource(GameState *game, ResourceId resource, int amount) {
+  int i;
+  if (amount <= 0) {
+    return;
+  }
+  for (i = 0; i < MAX_MINI_QUESTS; i++) {
+    MiniQuest *mq = &game->mini_quests[i];
+    if (!mq->active || mq->completed) {
+      continue;
+    }
+    if ((mq->type == MINIQUEST_HERB && resource == RESOURCE_HERB) ||
+        (mq->type == MINIQUEST_ORE && resource == RESOURCE_ORE)) {
+      mq->progress = clamp_int(mq->progress + amount, 0, mq->target);
+    }
+  }
+  resolve_completed_miniquests(game);
+}
+void progress_miniquests_hunt(GameState *game, int zone) {
+  int i;
+  for (i = 0; i < MAX_MINI_QUESTS; i++) {
+    MiniQuest *mq = &game->mini_quests[i];
+    if (!mq->active || mq->completed || mq->type != MINIQUEST_HUNT) {
+      continue;
+    }
+    if (mq->zone == zone) {
+      mq->progress = clamp_int(mq->progress + 1, 0, mq->target);
+    }
+  }
+  resolve_completed_miniquests(game);
+}
 static void process_ready_tasks(GameState *game) {
   int safety = 0;
   while (safety < 256 && Feather_step(&game->feather)) {
@@ -203,6 +452,10 @@ static void process_ready_tasks(GameState *game) {
 }
 void tick_game_tasks(GameState *game) {
   process_ready_tasks(game);
+  clear_expired_world_events(game);
+  maybe_spawn_conditional_event(game);
+  ensure_miniquests(game);
+  resolve_completed_miniquests(game);
 }
 void advance_time(GameState *game, int minutes) {
   game->clock_ms += minutes_to_ms(minutes);
@@ -217,6 +470,12 @@ static void task_weather_shift(void *context) {
   game->weather = next_weather;
   push_event(game, "날씨 변화: %s가 남부를 휩쓸기 시작합니다.",
              kWeatherNames[game->weather]);
+  if (game->weather == WEATHER_STORM || game->weather == WEATHER_ASH) {
+    add_world_event(game, EVENT_CATEGORY_WEATHER, game->player.zone,
+                    1 + event_power_scale(game), 1,
+                    "%s 일대에 %s 경보가 발령되었습니다.",
+                    kZones[game->player.zone].name, kWeatherNames[game->weather]);
+  }
 }
 static void task_restock(void *context) {
   GameState *game = (GameState *)context;
@@ -227,6 +486,10 @@ static void task_restock(void *context) {
   game->caravan_zone = caravan_stops[rand() % 3];
   push_event(game, "상인들이 물자를 재입고했습니다. 이동 상단이 %s에 야영지를 엽니다.",
              kZones[game->caravan_zone].name);
+  add_world_event(game, EVENT_CATEGORY_ECONOMY, game->caravan_zone,
+                  1 + game->player.level / 4, 1,
+                  "%s에서 거래 세율이 일시 완화되었습니다.",
+                  kZones[game->caravan_zone].name);
 }
 static void task_regen(void *context) {
   GameState *game = (GameState *)context;
@@ -287,10 +550,12 @@ static void task_npc_aid(void *context) {
   }
   if (roll_range(0, 99) < 35) {
     game->player.potions++;
+    adjust_npc_favor(game, game->player.zone, 2);
     push_event(game, "현지 지원대가 %s에게 응급 포션 1개를 전달했습니다.",
                game->player.name);
   } else if (roll_range(0, 99) < 50) {
     game->player.relic_dust++;
+    adjust_npc_favor(game, game->player.zone, 1);
     push_event(game, "학자 길드가 정제한 유물 가루 1개를 전달했습니다.");
   }
 }
@@ -328,6 +593,10 @@ void init_game(GameState *game) {
   game->port_potions = 4;
   game->caravan_zone = ZONE_LANTERN_WARD;
   game->running = true;
+  game->miniquest_generation_day = 0;
+  adjust_npc_favor(game, ZONE_EMBERFALL_GATE, 15);
+  adjust_npc_favor(game, ZONE_BRASS_MARKET, 8);
+  adjust_npc_favor(game, ZONE_VERDANT_ABBEY, 10);
   Feather_init(&game->feather);
   Feather_set_time_source(&game->feather, game_now_ms, game);
   enqueue_repeating_task(game, task_weather_shift, 180, 180,
@@ -344,6 +613,8 @@ void init_game(GameState *game) {
                          FSScheduler_Priority_INTERACTIVE);
   enqueue_repeating_task(game, task_npc_aid, 210, 210,
                          FSScheduler_Priority_BACKGROUND);
+  add_world_event(game, EVENT_CATEGORY_MYSTIC, ZONE_EMBERFALL_GATE, 2, 2,
+                  "엠버폴 관문에 임시 지원 거점이 구축되어 보급이 강화되었습니다.");
   refresh_rumor(game);
 }
 void select_class(GameState *game, PlayerClass cls) {
@@ -411,6 +682,11 @@ bool save_game(const GameState *game, const char *path) {
   data.port_potions = game->port_potions;
   data.caravan_zone = game->caravan_zone;
   snprintf(data.rumor, sizeof(data.rumor), "%s", game->rumor);
+  memcpy(data.world_events, game->world_events, sizeof(data.world_events));
+  data.world_event_count = game->world_event_count;
+  memcpy(data.npc_rel, game->npc_rel, sizeof(data.npc_rel));
+  memcpy(data.mini_quests, game->mini_quests, sizeof(data.mini_quests));
+  data.miniquest_generation_day = game->miniquest_generation_day;
   data.player = game->player;
   data.remedy_quest = (int)game->remedy_quest;
   data.caravan_quest = (int)game->caravan_quest;
@@ -447,7 +723,8 @@ bool load_game(GameState *game, const char *path) {
     return false;
   }
   fclose(file);
-  if (data.magic != SAVE_MAGIC || data.version != SAVE_VERSION) {
+  if (data.magic != SAVE_MAGIC ||
+      data.version < SAVE_VERSION_MIN || data.version > SAVE_VERSION) {
     return false;
   }
   if (data.weather < 0 || data.weather >= WEATHER_COUNT ||
@@ -464,6 +741,13 @@ bool load_game(GameState *game, const char *path) {
   game->port_potions = data.port_potions;
   game->caravan_zone = data.caravan_zone;
   snprintf(game->rumor, sizeof(game->rumor), "%s", data.rumor);
+  if (data.version >= SAVE_VERSION) {
+    memcpy(game->world_events, data.world_events, sizeof(game->world_events));
+    game->world_event_count = clamp_int(data.world_event_count, 0, MAX_WORLD_EVENTS);
+    memcpy(game->npc_rel, data.npc_rel, sizeof(game->npc_rel));
+    memcpy(game->mini_quests, data.mini_quests, sizeof(game->mini_quests));
+    game->miniquest_generation_day = data.miniquest_generation_day;
+  }
   game->player = data.player;
   game->remedy_quest = (QuestStage)data.remedy_quest;
   game->caravan_quest = (QuestStage)data.caravan_quest;
@@ -507,5 +791,6 @@ bool load_game(GameState *game, const char *path) {
   if (is_blank(game->rumor)) {
     refresh_rumor(game);
   }
+  clear_expired_world_events(game);
   return true;
 }

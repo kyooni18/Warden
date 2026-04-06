@@ -99,6 +99,7 @@ void hunt_current_zone(GameState *game) {
   if (result != BATTLE_RESULT_VICTORY) {
     return;
   }
+  progress_miniquests_hunt(game, game->player.zone);
   if (strcmp(enemy.name, "도적 영주") == 0) {
     handle_bandit_boss_victory(game);
   }
@@ -122,19 +123,45 @@ void scout_zone(GameState *game) {
 void gather_resources(GameState *game) {
   const ZoneData *zone = &kZones[game->player.zone];
   int amount = 1;
+  int weather_bonus = 0;
+  int event_bonus =
+      world_event_intensity(game, game->player.zone, EVENT_CATEGORY_ECONOMY);
   if (zone->resource == RESOURCE_NONE) {
     printf("이곳에서는 채집할 만한 것이 보이지 않습니다.\n");
     return;
   }
-  if (game->weather == WEATHER_CLEAR || game->weather == WEATHER_RAIN) {
-    amount++;
+  if (zone->resource == RESOURCE_HERB) {
+    if (game->weather == WEATHER_RAIN) {
+      weather_bonus += 2;
+    } else if (game->weather == WEATHER_FOG) {
+      weather_bonus += 1;
+    }
+  } else if (zone->resource == RESOURCE_ORE) {
+    if (game->weather == WEATHER_CLEAR) {
+      weather_bonus += 1;
+    } else if (game->weather == WEATHER_RAIN) {
+      weather_bonus -= 1;
+    } else if (game->weather == WEATHER_STORM) {
+      weather_bonus -= 1;
+    }
+  }
+  amount += weather_bonus;
+  amount += event_bonus / 2;
+  if (amount < 1) {
+    amount = 1;
   }
   if (zone->resource == RESOURCE_HERB) {
     game->player.herbs += amount;
     printf("약초 묶음 %d개를 채집했습니다.\n", amount);
+    progress_miniquests_resource(game, RESOURCE_HERB, amount);
   } else if (zone->resource == RESOURCE_ORE) {
     game->player.ore += amount;
     printf("광석 덩이 %d개를 채굴했습니다.\n", amount);
+    progress_miniquests_resource(game, RESOURCE_ORE, amount);
+  }
+  if (weather_bonus != 0 || (event_bonus / 2) != 0) {
+    printf("환경 영향: 날씨 %s%d, 지역 이벤트 +%d.\n",
+           weather_bonus >= 0 ? "+" : "", weather_bonus, event_bonus / 2);
   }
   advance_time(game, 35);
   flush_events(game);
@@ -466,12 +493,15 @@ void interact_here(GameState *game) {
   if (zone->healer && game->player.hp < game->player.max_hp) {
     int heal = 10 + game->player.level;
     game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+    adjust_npc_favor(game, game->player.zone, 1);
     printf("치유소에서 응급 처치를 받아 체력 %d를 회복했습니다.\n", heal);
     advance_time(game, 20);
     flush_events(game);
     return;
   }
   if (zone->npc != NULL && zone->npc[0] != '\0') {
+    printf("%s와(과)의 신뢰도는 현재 %d입니다.\n", zone->npc,
+           npc_favor(game, game->player.zone));
     talk_here(game);
     return;
   }
@@ -657,6 +687,7 @@ void talk_here(GameState *game) {
     printf("이곳에는 대화할 상대가 없습니다.\n");
     return;
   }
+  adjust_npc_favor(game, game->player.zone, 1);
   advance_time(game, 20);
   flush_events(game);
 }
@@ -664,6 +695,13 @@ static int potion_price(const GameState *game, bool port_prices) {
   int price = port_prices ? 13 : 12;
   if (game->caravan_quest == QUEST_COMPLETE) {
     price -= 2;
+  }
+  price -= npc_favor(game, game->player.zone) / 25;
+  if (world_event_intensity(game, game->player.zone, EVENT_CATEGORY_ECONOMY) > 0) {
+    price -= 1;
+  }
+  if (price < 6) {
+    price = 6;
   }
   return price;
 }
@@ -748,11 +786,12 @@ bool handle_trade_command(GameState *game, const char *command) {
       return true;
     }
     game->player.herbs--;
-    game->player.gold += 3;
-    printf("약초를 3골드에 판매했습니다.\n");
-    advance_time(game, 5);
-    flush_events(game);
-    return true;
+      game->player.gold += 3;
+      printf("약초를 3골드에 판매했습니다.\n");
+      adjust_npc_favor(game, game->player.zone, 1);
+      advance_time(game, 5);
+      flush_events(game);
+      return true;
   }
   if (strcmp(command, "sell ore") == 0) {
     if (game->player.ore <= 0) {
@@ -760,11 +799,12 @@ bool handle_trade_command(GameState *game, const char *command) {
       return true;
     }
     game->player.ore--;
-    game->player.gold += 4;
-    printf("광석을 4골드에 판매했습니다.\n");
-    advance_time(game, 5);
-    flush_events(game);
-    return true;
+      game->player.gold += 4;
+      printf("광석을 4골드에 판매했습니다.\n");
+      adjust_npc_favor(game, game->player.zone, 1);
+      advance_time(game, 5);
+      flush_events(game);
+      return true;
   }
   if (strcmp(command, "sell dust") == 0) {
     if (game->player.relic_dust <= 0) {
@@ -772,11 +812,12 @@ bool handle_trade_command(GameState *game, const char *command) {
       return true;
     }
     game->player.relic_dust--;
-    game->player.gold += 8;
-    printf("유물 가루를 8골드에 판매했습니다.\n");
-    advance_time(game, 5);
-    flush_events(game);
-    return true;
+      game->player.gold += 8;
+      printf("유물 가루를 8골드에 판매했습니다.\n");
+      adjust_npc_favor(game, game->player.zone, 2);
+      advance_time(game, 5);
+      flush_events(game);
+      return true;
   }
   return false;
 }
@@ -927,6 +968,10 @@ void rest_here(GameState *game) {
     printf("숙소를 이용할 골드가 부족합니다.\n");
     return;
   }
+  if (cost > 0) {
+    int discount = npc_favor(game, game->player.zone) / 20;
+    cost = clamp_int(cost - discount, 0, cost);
+  }
   game->player.gold -= cost;
   advance_time(game, 480);
   game->player.hp = game->player.max_hp;
@@ -952,12 +997,31 @@ static bool move_player(GameState *game, const char *direction) {
   }
   game->player.zone = next_zone;
   game->player.discovered[next_zone] = true;
-  advance_time(game, 30);
+  /* Travel animation: show ASCII art overlay for ~600 ms before arriving. */
+  {
+    TuiState *tui = tui_get_global();
+    if (tui && tui->initialized) {
+      tui_draw_travel_animation(tui, game, next_zone);
+    }
+  }
+  {
+    int travel_minutes = 30;
+    int night_penalty = (current_hour(game) >= 22 || current_hour(game) <= 4) ? 8 : 0;
+    int storm_penalty = (game->weather == WEATHER_STORM) ? 6 : 0;
+    travel_minutes += night_penalty + storm_penalty;
+    advance_time(game, travel_minutes);
+  }
   flush_events(game);
   /* Random travel event (30% chance) */
-  if (!kZones[next_zone].safe && rand() % 100 < 30) {
-    int roll = rand() % 8;
-    switch (roll) {
+  {
+    int risk_bonus = world_event_intensity(game, next_zone, EVENT_CATEGORY_THREAT) * 6;
+    int encounter_chance = 30 + risk_bonus;
+    if (game->weather == WEATHER_FOG) {
+      encounter_chance -= 8;
+    }
+    if (!kZones[next_zone].safe && rand() % 100 < encounter_chance) {
+      int roll = rand() % 8;
+      switch (roll) {
     case 0: {
       int found = roll_range(3, 12);
       game->player.gold += found;
@@ -1029,8 +1093,9 @@ static bool move_player(GameState *game, const char *direction) {
       }
       break;
     }
-    default:
-      break;
+      default:
+        break;
+      }
     }
   }
   describe_zone(game);

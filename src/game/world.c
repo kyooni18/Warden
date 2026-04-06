@@ -452,6 +452,160 @@ const ZoneData kZones[ZONE_COUNT] = {
         .forge = true,
         .archive = false,
     },
+    /* ---- Row 6: deep south ---- */
+    [ZONE_CRIMSON_DELTA] = {
+        .name = "진홍 삼각주",
+        .short_name = "삼각",
+        .description =
+            "에코 해안 남쪽으로 강 세 줄기가 붉은 점토와 뒤섞인 넓은 삼각주를 이룹니다. "
+            "희귀 해초약초가 갈대 사이로 무성하게 자라지만, 조류 마귀와 삼각주 수호자가 "
+            "영역을 집요하게 지킵니다.",
+        .scout_text =
+            "밀물 때 수확하고 썰물에 대피해야 합니다. 갈대 숲 깊이 숨겨진 약초는 수도원의 "
+            "처방에도 없는 희귀한 종류입니다.",
+        .npc = "조류만이 대답합니다.",
+        .resource = RESOURCE_HERB,
+        .danger = 6,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_VOID_SPIRE] = {
+        .name = "공허 첨탑",
+        .short_name = "공첨",
+        .description =
+            "뼈 무덤 남쪽에 검은 첨탑이 하늘을 꿰뚫듯 솟아 있습니다. 내부는 고밀도 공허 "
+            "에너지로 가득 차 모든 물질이 서서히 부식됩니다. 탑 안의 수호자들은 더 이상 "
+            "생명체가 아닌 공허의 병기입니다.",
+        .scout_text =
+            "첨탑 내부로 발을 들이면 돌아오지 못할 수도 있습니다. 그러나 그 안에는 "
+            "왕국의 비밀 기록과 함께 엄청난 힘이 잠들어 있습니다.",
+        .npc = "첨탑이 스스로를 읽습니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 9,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = true,
+    },
+    [ZONE_WANDERER_HAVEN] = {
+        .name = "방랑자 안식처",
+        .short_name = "안식",
+        .description =
+            "빛의 첨탑 남쪽 협곡에 낡은 수레와 천막이 모여 있습니다. 방랑자들과 "
+            "남쪽 탐험에서 살아 돌아온 이들이 지식과 물자를 교환합니다. 치료사 마야가 "
+            "상처 입은 여행자들을 반깁니다.",
+        .scout_text =
+            "험난한 남쪽 지역을 위한 마지막 준비 기지입니다. 희귀 지도와 소문이 이곳에서 "
+            "가장 먼저 들립니다. 깊은 남쪽으로 가기 전 반드시 들를 곳입니다.",
+        .npc = "치료사 마야",
+        .resource = RESOURCE_NONE,
+        .danger = 2,
+        .safe = true,
+        .merchant = true,
+        .healer = true,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_EMBER_WASTES] = {
+        .name = "불꽃 황무지",
+        .short_name = "황무",
+        .description =
+            "부서진 성채 남쪽으로 화산 분화가 반복되어 생성된 거대한 황무지입니다. "
+            "뜨거운 재가 공중에 항상 떠돌며, 단단한 화산암 속에 최고 등급의 강철 광석이 "
+            "묻혀 있습니다. 불꽃 거인과 용암 사냥꾼이 이 땅의 주인입니다.",
+        .scout_text =
+            "극한의 환경이지만 보상도 극한입니다. 인내할 수 있다면 왕국 최강의 무기 재료를 "
+            "얻을 수 있습니다.",
+        .npc = "재가 모든 말을 삼킵니다.",
+        .resource = RESOURCE_ORE,
+        .danger = 8,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = true,
+        .archive = false,
+    },
+    /* ---- Row 7: frontier end-game zones ---- */
+    [ZONE_TIDE_CAVERN] = {
+        .name = "조류 동굴",
+        .short_name = "조굴",
+        .description =
+            "진홍 삼각주 남쪽으로 바다가 뚫은 거대한 동굴 단지입니다. 만조 때는 완전히 "
+            "침수되고 간조 때만 탐험이 가능합니다. 동굴 벽에는 발광 해초가 자라며, "
+            "심해 포식자들이 어두운 수로를 지킵니다.",
+        .scout_text =
+            "조수 시간표를 모르고 들어가면 돌아오지 못합니다. 발광 해초는 최고 등급의 "
+            "치료제 원료이며, 가장 깊은 방에 고대 항해 지도가 보관되어 있습니다.",
+        .npc = "동굴이 조수처럼 숨 쉽니다.",
+        .resource = RESOURCE_HERB,
+        .danger = 7,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_ABYSS_MOUTH] = {
+        .name = "심연의 입구",
+        .short_name = "심연",
+        .description =
+            "공허 첨탑 남쪽 지반이 완전히 부서진 곳에 세계의 끝처럼 깊은 균열이 입을 "
+            "벌리고 있습니다. 균열 가장자리에서 공허의 힘이 흘러 나와 주변 모든 것을 "
+            "서서히 부식시킵니다. 이곳까지 살아서 온 자는 거의 없습니다.",
+        .scout_text =
+            "세계의 경계입니다. 돌아올 보장은 없지만, 공허의 근원을 이해하려면 이곳을 "
+            "마주해야 합니다. 무엇이 기다리는지는 당신만이 알게 될 것입니다.",
+        .npc = "심연만이 응시합니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 10,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = true,
+    },
+    [ZONE_SILVER_SUMMIT] = {
+        .name = "은봉 정상",
+        .short_name = "은봉",
+        .description =
+            "방랑자 안식처 남쪽 고산 지대에 은빛으로 빛나는 광맥이 드러난 험준한 정상입니다. "
+            "고대 드워프 대장간이 아직 기능을 유지하며, 정상의 공기 속에서 단련한 강철은 "
+            "다른 어느 곳에서도 만들 수 없는 품질을 자랑합니다.",
+        .scout_text =
+            "정상에 오르는 길은 눈폭풍과 산악 수호자로 가득합니다. 그러나 드워프 대장간과 "
+            "순수 은광석은 그 고난을 감수할 만한 가치가 있습니다.",
+        .npc = "드워프 대장장이 구든의 흔적이 남아 있습니다.",
+        .resource = RESOURCE_ORE,
+        .danger = 6,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = true,
+        .archive = false,
+    },
+    [ZONE_ASHEN_DESOLATION] = {
+        .name = "잿빛 황폐지",
+        .short_name = "황폐",
+        .description =
+            "불꽃 황무지 남쪽, 수백 년 전 거대한 화산 폭발로 모든 생명이 사라진 황폐한 "
+            "평원입니다. 잿더미와 용암이 굳은 암반만 남은 이곳에서 공허의 힘이 "
+            "죽은 화산재를 일으켜 무기로 사용합니다.",
+        .scout_text =
+            "이 땅에는 생명이 없습니다. 그러나 황폐지 깊은 곳 지하에 태곳적 힘이 잠들어 "
+            "있으며, 공허의 최강 하수인들이 그 힘을 지키고 있습니다.",
+        .npc = "재만이 움직입니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 9,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
 };
 const char *kWeatherNames[WEATHER_COUNT] = {
     "맑음", "비", "안개", "강풍", "화산재", "폭풍"};
