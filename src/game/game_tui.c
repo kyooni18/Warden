@@ -68,33 +68,65 @@ static int count_active_miniquests(const struct GameState *game) {
 static void compute_layout(TuiState *tui)
 {
     getmaxyx(stdscr, tui->rows, tui->cols);
+    tui->mobile_vertical = (tui->rows > tui->cols);
+    tui->visible_rows = tui->rows;
+    if (tui->mobile_vertical && tui->rows >= 18) {
+        /* Reserve lower half for software keyboard on narrow/tall displays */
+        tui->visible_rows = tui->rows / 2;
+    }
+    if (tui->visible_rows < 12) {
+        tui->visible_rows = tui->rows;
+    }
 
     tui->map_cols = MAP_COLS;
-    if (tui->cols < MAP_COLS + 20) {
+    if (tui->mobile_vertical) {
+        tui->map_cols = tui->cols;
+    } else if (tui->cols < MAP_COLS + 20) {
         /* Terminal too narrow — shrink map panel proportionally */
         tui->map_cols = tui->cols / 2;
     }
 
-    int usable = tui->rows - HEADER_ROWS - INPUT_ROWS;
-    /* Give log roughly one third of usable rows */
-    tui->log_rows = usable / 3;
+    int usable = tui->visible_rows - HEADER_ROWS - INPUT_ROWS;
+    if (usable < 6) {
+        usable = 6;
+    }
+    /* Give log more space in mobile mode where lower screen is occluded */
+    tui->log_rows = tui->mobile_vertical ? (usable / 2) : (usable / 3);
     if (tui->log_rows < MIN_LOG_ROWS)    tui->log_rows = MIN_LOG_ROWS;
     tui->upper_rows = usable - tui->log_rows;
-    if (tui->upper_rows < MIN_UPPER_ROWS) tui->upper_rows = MIN_UPPER_ROWS;
+    if (tui->upper_rows < MIN_UPPER_ROWS && !tui->mobile_vertical) {
+        tui->upper_rows = MIN_UPPER_ROWS;
+    }
+    if (tui->upper_rows < 4) {
+        tui->upper_rows = 4;
+    }
+    if (tui->upper_rows + tui->log_rows > usable) {
+        tui->log_rows = usable - tui->upper_rows;
+        if (tui->log_rows < 2) {
+            tui->log_rows = 2;
+            tui->upper_rows = usable - tui->log_rows;
+            if (tui->upper_rows < 4) {
+                tui->upper_rows = 4;
+            }
+        }
+    }
 }
 
 /* ---- Internal: create all ncurses windows ---- */
 static void create_windows(TuiState *tui)
 {
-    int info_cols = tui->cols - tui->map_cols;
+    int info_cols = tui->mobile_vertical ? tui->cols : (tui->cols - tui->map_cols);
     int log_start = HEADER_ROWS + tui->upper_rows;
-    int input_row = tui->rows - INPUT_ROWS;
+    int input_row = tui->visible_rows - INPUT_ROWS;
 
     tui->win_header = newwin(HEADER_ROWS, tui->cols, 0, 0);
-    tui->win_map    = newwin(tui->upper_rows, tui->map_cols,
-                             HEADER_ROWS, 0);
-    tui->win_info   = newwin(tui->upper_rows, info_cols,
-                             HEADER_ROWS, tui->map_cols);
+    if (tui->mobile_vertical) {
+        tui->win_map    = NULL;
+        tui->win_info   = newwin(tui->upper_rows, info_cols, HEADER_ROWS, 0);
+    } else {
+        tui->win_map    = newwin(tui->upper_rows, tui->map_cols, HEADER_ROWS, 0);
+        tui->win_info   = newwin(tui->upper_rows, info_cols, HEADER_ROWS, tui->map_cols);
+    }
     tui->win_log    = newwin(tui->log_rows, tui->cols, log_start, 0);
     tui->win_input  = newwin(INPUT_ROWS, tui->cols, input_row, 0);
 }
@@ -748,6 +780,9 @@ static void tui_draw_header(TuiState *tui)
     wattron(w, COLOR_PAIR(CP_HEADER) | A_BOLD | A_REVERSE);
     mvwhline(w, 0, 0, ' ', cols);
     const char *title = " WARDEN OF THE VOID CROWN — 공허의 왕관의 재 ";
+    if (tui->mobile_vertical) {
+        title = " WARDEN MOBILE ";
+    }
     int tx = (cols - (int)strlen(title)) / 2;
     if (tx < 0) tx = 0;
     mvwaddstr(w, 0, tx, title);
@@ -760,7 +795,9 @@ void tui_refresh_all(TuiState *tui, const struct GameState *game)
 {
     if (!tui || !tui->initialized) return;
     tui_draw_header(tui);
-    tui_draw_map(tui, game);
+    if (!tui->mobile_vertical) {
+        tui_draw_map(tui, game);
+    }
     tui_draw_info(tui, game);
     tui_draw_log(tui);
     tui_draw_input(tui, "명령> ", tui->input_buf, tui->input_len);

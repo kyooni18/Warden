@@ -51,6 +51,8 @@ typedef struct TuiState {
     int upper_rows;   /* rows for map + info panels */
     int log_rows;     /* rows for the log panel     */
     int map_cols;     /* column width of map panel  */
+    int visible_rows; /* rows guaranteed visible (mobile-safe) */
+    bool mobile_vertical;
 
     bool initialized;
     bool combat_mode; /* true while run_battle() is executing */
