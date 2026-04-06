@@ -299,6 +299,159 @@ const ZoneData kZones[ZONE_COUNT] = {
         .forge = false,
         .archive = false,
     },
+    [ZONE_DEEPWOOD_HOLLOW] = {
+        .name = "심숲 분지",
+        .short_name = "심숲",
+        .description =
+            "숯불 수림 남쪽, 고대의 나무가 하늘을 가리는 분지입니다. 수천 년 된 고목 사이로 "
+            "드루이드의 제단과 이끼 낀 석상이 서 있으며, 공기는 두꺼운 생명의 향기로 가득 "
+            "합니다. 이곳의 정령들은 아직도 살아 숨 쉽니다.",
+        .scout_text =
+            "드루이드 에이브가 성소를 지킵니다. 희귀한 약초가 지천에 자라지만, 숲의 "
+            "수호령과 가시 정령이 침입자를 달가워하지 않습니다.",
+        .npc = "드루이드 에이브",
+        .resource = RESOURCE_HERB,
+        .danger = 5,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_MAGMA_RIFT] = {
+        .name = "용암 균열",
+        .short_name = "용균",
+        .description =
+            "흑요 분화구 남쪽, 지각이 갈라지며 드러난 거대한 용암 지대입니다. 붉은 용암이 "
+            "갈라진 암반 틈 사이로 끊임없이 흘러내리고, 공기는 황 냄새와 열기로 숨이 막힙니다. "
+            "극한 환경이지만 가장 단단한 광석이 이곳에서만 나옵니다.",
+        .scout_text =
+            "용암 균열은 최후의 시험장입니다. 용암 골렘과 화염 폭군이 배회하며, 극소수의 "
+            "단련된 대장장이만이 이곳의 불꽃 앞에서 최고의 강철을 뽑아냅니다.",
+        .npc = "용암만이 노래합니다.",
+        .resource = RESOURCE_ORE,
+        .danger = 8,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = true,
+        .archive = false,
+    },
+    [ZONE_ANCIENT_BEACON] = {
+        .name = "고대 봉화",
+        .short_name = "봉화",
+        .description =
+            "폐허 대성당 남쪽 절벽 위에 자리한 오래된 봉화대입니다. 한때 왕국 전역에 "
+            "신호를 보내던 이 봉화는 오래전 꺼졌습니다. 봉화지기 오른이 혼자 이곳을 지키며 "
+            "봉화를 다시 밝히려는 희망을 잃지 않고 있습니다.",
+        .scout_text =
+            "봉화지기 오른은 친절하지만 지쳐 있습니다. 봉화를 다시 밝히면 왕국 전역에 "
+            "희망의 빛을 보낼 수 있습니다. 이곳은 비교적 안전하지만 길 잃은 병사들이 "
+            "때로 이곳까지 헤매어 옵니다.",
+        .npc = "봉화지기 오른",
+        .resource = RESOURCE_NONE,
+        .danger = 3,
+        .safe = true,
+        .merchant = false,
+        .healer = true,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_SHATTERED_VAULT] = {
+        .name = "파쇄 금고",
+        .short_name = "금고",
+        .description =
+            "공허 왕좌 아래 깊이 묻혀 있던 왕국의 마지막 비밀 금고입니다. 왕관이 부서지자 "
+            "봉인이 풀리며 이 공간이 드러났습니다. 수백 년간 잠들어 있던 보물과 고대 기록이 "
+            "먼지 속에 잠들어 있습니다.",
+        .scout_text =
+            "왕관의 사슬에서 해방된 공간입니다. 위험은 없지만, 이곳에는 왕국의 진실이 "
+            "담긴 기록과 그 어느 곳에서도 찾을 수 없는 보물이 잠들어 있습니다.",
+        .npc = "오래된 침묵만이 흐릅니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 0,
+        .safe = true,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = true,
+    },
+    [ZONE_ECHO_SHORE] = {
+        .name = "메아리 해안",
+        .short_name = "해안",
+        .description =
+            "폭풍감시 절벽 너머 잊힌 해안선입니다. 파도 소리가 동굴 사이에서 메아리처럼 "
+            "울려 퍼지며, 오래된 난파선과 기이한 해초가 뒤섞인 이곳에서 은자 레나가 세상과 "
+            "단절된 채 살아갑니다. 달빛 아래 해안 정령들이 모습을 드러냅니다.",
+        .scout_text =
+            "레나는 오래전 왕국을 떠났지만 아직 도울 수 있습니다. 해초약초가 풍부하지만 "
+            "조류 정령이 달빛 아래 나타나고, 깊은 동굴에는 더 위험한 것들이 숨어 있습니다.",
+        .npc = "은자 레나",
+        .resource = RESOURCE_HERB,
+        .danger = 5,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_BONE_TOMB] = {
+        .name = "뼈 무덤",
+        .short_name = "묘지",
+        .description =
+            "지하 깊숙이 이어지는 고대 묘지 단지입니다. 수천 개의 뼈와 부서진 갑옷이 "
+            "미로처럼 쌓여 있으며, 공허의 힘에 의해 일어선 영혼들이 어두운 복도를 배회합니다. "
+            "이곳에 잠든 전사들은 아직도 왕국이 멸망했다는 사실을 모릅니다.",
+        .scout_text =
+            "묘지의 침묵은 일시적입니다. 해골 기사와 저주받은 군주가 이 거대한 무덤의 "
+            "주인을 자처합니다. 전투에서 이기면 희귀한 유물을 찾을 수 있습니다.",
+        .npc = "뼈의 메아리만이 흐릅니다.",
+        .resource = RESOURCE_NONE,
+        .danger = 7,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = false,
+        .archive = false,
+    },
+    [ZONE_LIGHT_SPIRE] = {
+        .name = "빛의 첨탑",
+        .short_name = "첨탑",
+        .description =
+            "메아리 해안 너머 바위 위에 세워진 고대 첨탑입니다. 탑 꼭대기에서 여전히 따뜻한 "
+            "빛이 흘러나오며, 내부에는 고대 지식의 보관소와 치유의 방이 마련되어 있습니다. "
+            "첨탑 사서 에반이 남아 있는 희망을 지키며 순례자들을 돌봅니다.",
+        .scout_text =
+            "에반은 세계의 지식을 집대성하고 있습니다. 첨탑은 안전하며, 지친 영혼에게는 "
+            "진정한 휴식처가 될 것입니다. 성채 해방의 단서도 이곳에 있습니다.",
+        .npc = "첨탑 사서 에반",
+        .resource = RESOURCE_NONE,
+        .danger = 2,
+        .safe = true,
+        .merchant = false,
+        .healer = true,
+        .forge = false,
+        .archive = true,
+    },
+    [ZONE_IRON_CITADEL] = {
+        .name = "부서진 성채",
+        .short_name = "성채",
+        .description =
+            "왕국의 마지막 군사 요새였던 성채가 공허의 힘에 의해 함락되었습니다. 두꺼운 "
+            "철문과 무너진 망루 사이에 철갑 구울과 성채 군주가 둥지를 틀었습니다. 성채 "
+            "깊숙이 왕국 최후의 대장간과 비밀 창고가 아직 기능을 유지하고 있습니다.",
+        .scout_text =
+            "성채는 위험합니다. 철갑 구울과 성채 군주가 내부를 지킵니다. 그러나 성채를 "
+            "해방시킨다면 왕국 최고의 강철을 단련할 기회가 주어질 것입니다.",
+        .npc = "성채는 함락되었습니다.",
+        .resource = RESOURCE_ORE,
+        .danger = 7,
+        .safe = false,
+        .merchant = false,
+        .healer = false,
+        .forge = true,
+        .archive = false,
+    },
 };
 const char *kWeatherNames[WEATHER_COUNT] = {
     "맑음", "비", "안개", "강풍", "화산재", "폭풍"};
