@@ -1,166 +1,327 @@
 #define _POSIX_C_SOURCE 200809L
+#include <time.h>
+#include <signal.h>
 #include "game_shared.h"
 
-static void print_intro(void) {
-  printf("Feather RPG: 공허의 왕관의 재\n");
-  printf("Feather 협력형 스케줄러로 구동되는 텍스트 RPG입니다.\n");
-  printf("시간이 흐르는 동안 세계는 계속 움직입니다: 날씨 변화, 상단 이동, "
-         "소문 확산, 파멸도 상승, 그리고 길 위의 회복/위협.\n");
+/* ---- SIGWINCH handler for terminal resize ---- */
+static volatile sig_atomic_t g_resize_pending = 0;
+static void handle_sigwinch(int sig) {
+  (void)sig;
+  g_resize_pending = 1;
 }
-int rpg_run(void) {
-  GameState game;
-  char input[MAX_INPUT];
-  char command[MAX_INPUT];
-  srand((unsigned int)time(NULL));
-  init_game(&game);
-  print_intro();
-  /* Class selection */
-  printf("\n직업을 선택하세요:\n");
-  printf("  1. 전사  - 높은 체력/방어, parry(막기), bash(방패 강타) 특기\n");
-  printf("  2. 척후  - 빠른 공격/이탈, backstab(기습), vanish(은신) 특기\n");
-  printf("  3. 마법사 - 마력 공격, fireball(화염구), frost(냉기 화살) 특기\n");
-  printf("  4. 성직자 - 치유 중심, smite(신성 피해+자가치유), holy_barrier(Lv4) 특기\n");
-  if (read_command("선택 (1/2/3/4, 엔터=전사): ", input, sizeof(input))) {
-    canonicalize_input(input, command, sizeof(command));
-    if (strcmp(command, "2") == 0) {
-      select_class(&game, CLASS_SCOUT);
-      printf("척후 선택. 빠른 발과 날카로운 눈으로 길을 개척하십시오.\n");
-    } else if (strcmp(command, "3") == 0) {
-      select_class(&game, CLASS_MAGE);
-      printf("마법사 선택. 아는 것이 힘입니다. 룬 파편으로 화염구와 냉기 화살을 사용하세요.\n");
-    } else if (strcmp(command, "4") == 0) {
-      select_class(&game, CLASS_CLERIC);
-      printf("성직자 선택. 신성한 빛이 어둠을 밝힙니다. smite로 피해를 주고 스스로를 치유하세요.\n");
-    } else {
-      select_class(&game, CLASS_WARRIOR);
-      printf("전사 선택. 강철이 말하게 하십시오.\n");
-    }
+
+/* ---- Startup: class and name selection via ncurses ---- */
+static void startup_screen(GameState *game, TuiState *tui)
+{
+  /* Temporarily enable echo / blocking input for the setup prompts */
+  nodelay(stdscr, FALSE);
+  echo();
+  curs_set(1);
+
+  int rows, cols;
+  getmaxyx(stdscr, rows, cols);
+  (void)rows;
+
+  clear();
+
+  /* Title */
+  attron(COLOR_PAIR(CP_HEADER) | A_BOLD | A_REVERSE);
+  mvhline(0, 0, ' ', cols);
+  const char *title = " WARDEN OF THE VOID CROWN — 공허의 왕관의 재 ";
+  int tx = (cols - (int)strlen(title)) / 2;
+  if (tx < 0) tx = 0;
+  mvaddstr(0, tx, title);
+  attroff(COLOR_PAIR(CP_HEADER) | A_BOLD | A_REVERSE);
+
+  attron(COLOR_PAIR(CP_NORMAL));
+  mvaddstr(2, 2, "직업을 선택하세요:");
+  mvaddstr(4, 4, "[1] 전사    — 높은 체력/방어.  parry(막기), bash(방패 강타) 특기");
+  mvaddstr(5, 4, "[2] 척후    — 빠른 공격/이탈.  backstab(기습), vanish(은신) 특기");
+  mvaddstr(6, 4, "[3] 마법사  — 마력 공격.       fireball(화염구), frost(냉기화살) 특기");
+  mvaddstr(7, 4, "[4] 성직자  — 치유 중심.       smite(신성 피해+자가치유), holy_barrier(Lv4) 특기");
+  attroff(COLOR_PAIR(CP_NORMAL));
+
+  attron(COLOR_PAIR(CP_ZONE) | A_BOLD);
+  mvaddstr(9, 2, "선택 (1/2/3/4, 엔터=전사): ");
+  attroff(COLOR_PAIR(CP_ZONE) | A_BOLD);
+  refresh();
+
+  int ch = getch();
+  if (ch == '2') {
+    select_class(game, CLASS_SCOUT);
+    mvaddstr(10, 2, "척후 선택. 빠른 발과 날카로운 눈으로 길을 개척하십시오.");
+  } else if (ch == '3') {
+    select_class(game, CLASS_MAGE);
+    mvaddstr(10, 2, "마법사 선택. 아는 것이 힘입니다. 룬 파편으로 화염구와 냉기 화살을 사용하세요.");
+  } else if (ch == '4') {
+    select_class(game, CLASS_CLERIC);
+    mvaddstr(10, 2, "성직자 선택. 신성한 빛이 어둠을 밝힙니다.");
+  } else {
+    select_class(game, CLASS_WARRIOR);
+    mvaddstr(10, 2, "전사 선택. 강철이 말하게 하십시오.");
   }
-  if (read_command("수호자의 이름을 입력하세요 (빈칸이면 수호자): ", input,
-                   sizeof(input)) &&
-      !is_blank(input)) {
-    snprintf(game.player.name, sizeof(game.player.name), "%s", input);
+
+  /* Name input */
+  attron(COLOR_PAIR(CP_ZONE) | A_BOLD);
+  mvaddstr(12, 2, "수호자의 이름 (빈칸이면 '수호자'): ");
+  attroff(COLOR_PAIR(CP_ZONE) | A_BOLD);
+  refresh();
+
+  char name_buf[MAX_NAME];
+  memset(name_buf, 0, sizeof(name_buf));
+  getnstr(name_buf, (int)sizeof(name_buf) - 1);
+  /* Strip trailing newline/whitespace */
+  int len = (int)strlen(name_buf);
+  while (len > 0 && (name_buf[len-1] == '\n' || name_buf[len-1] == '\r' ||
+                     name_buf[len-1] == ' '))
+    name_buf[--len] = '\0';
+
+  if (len > 0) {
+    snprintf(game->player.name, sizeof(game->player.name), "%s", name_buf);
   }
-  printf("\n%s이(가) 남부 순찰대의 불빛이 희미해지는 저녁, 엠버폴 관문에 도착했습니다.\n",
-         game.player.name);
-  describe_zone(&game);
-  show_help(&game);
-  while (game.running) {
-    if (!read_command("\n명령> ", input, sizeof(input))) {
-      break;
+
+  /* Restore non-blocking mode */
+  noecho();
+  curs_set(0);
+  nodelay(stdscr, TRUE);
+
+  /* Announce arrival in the TUI log */
+  tui_append_log(tui, "");
+  {
+    char msg[128];
+    snprintf(msg, sizeof(msg),
+             "%s이(가) 저녁 빛이 희미해지는 엠버폴 관문에 도착했습니다.",
+             game->player.name);
+    tui_append_log(tui, msg);
+  }
+  tui_append_log(tui, "방향키 또는 n/s/e/w: 이동  |  명령어 입력 후 엔터  |  help: 도움말");
+}
+
+/* ---- Non-blocking input dispatch ---- */
+static void handle_char(GameState *game, TuiState *tui, int ch)
+{
+  /* Arrow keys → directional movement */
+  const char *dir = NULL;
+  switch (ch) {
+  case KEY_UP:    dir = "north"; break;
+  case KEY_DOWN:  dir = "south"; break;
+  case KEY_LEFT:  dir = "west";  break;
+  case KEY_RIGHT: dir = "east";  break;
+  default: break;
+  }
+  if (dir) {
+    maybe_handle_movement_command(game, dir);
+    flush_events(game);
+    tui_refresh_all(tui, game);
+    return;
+  }
+
+  /* Backspace */
+  if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
+    if (tui->input_len > 0) {
+      tui->input_buf[--tui->input_len] = '\0';
     }
-    canonicalize_input(input, command, sizeof(command));
-    if (command[0] == '\0') {
-      continue;
+    return;
+  }
+
+  /* Enter: dispatch the accumulated command */
+  if (ch == '\n' || ch == '\r' || ch == KEY_ENTER) {
+    if (tui->input_len == 0) return;
+
+    char command[MAX_INPUT];
+    canonicalize_input(tui->input_buf, command, sizeof(command));
+    tui->input_buf[0] = '\0';
+    tui->input_len = 0;
+
+    if (command[0] == '\0') return;
+
+    /* Echo the command to the log */
+    {
+      char echo_line[MAX_INPUT + 8];
+      snprintf(echo_line, sizeof(echo_line), "> %s", command);
+      tui_append_log(tui, echo_line);
     }
-    if (maybe_handle_movement_command(&game, command)) {
-      continue;
-    }
-    if (strcmp(command, "help") == 0 || strcmp(command, "도움말") == 0) {
-      show_help(&game);
+
+    if (maybe_handle_movement_command(game, command)) {
+      /* handled */
+    } else if (strcmp(command, "help") == 0 || strcmp(command, "도움말") == 0) {
+      show_help(game);
     } else if (strcmp(command, "look") == 0 || strcmp(command, "l") == 0) {
-      describe_zone(&game);
+      describe_zone(game);
     } else if (strcmp(command, "map") == 0) {
-      show_map(&game);
+      show_map(game);
     } else if (strcmp(command, "stats") == 0 || strcmp(command, "status") == 0) {
-      show_stats(&game);
-    } else if (strcmp(command, "inventory") == 0 ||
-               strcmp(command, "inv") == 0) {
-      show_inventory(&game);
-    } else if (strcmp(command, "quests") == 0 ||
-               strcmp(command, "journal") == 0) {
-      show_quests(&game);
+      show_stats(game);
+    } else if (strcmp(command, "inventory") == 0 || strcmp(command, "inv") == 0) {
+      show_inventory(game);
+    } else if (strcmp(command, "quests") == 0 || strcmp(command, "journal") == 0) {
+      show_quests(game);
     } else if (strcmp(command, "time") == 0) {
-      show_time(&game);
-    } else if (strcmp(command, "rumor") == 0 ||
+      show_time(game);
+    } else if (strcmp(command, "rumor")  == 0 ||
                strcmp(command, "rumours") == 0 ||
-               strcmp(command, "rumors") == 0) {
-      printf("%s\n", game.rumor);
+               strcmp(command, "rumors")  == 0) {
+      tui_append_log(tui, game->rumor);
     } else if (strcmp(command, "scout") == 0) {
-      scout_zone(&game);
-    } else if (strcmp(command, "hunt") == 0 ||
-               strcmp(command, "fight") == 0) {
-      hunt_current_zone(&game);
+      scout_zone(game);
+    } else if (strcmp(command, "hunt") == 0 || strcmp(command, "fight") == 0) {
+      hunt_current_zone(game);
     } else if (strcmp(command, "gather") == 0) {
-      gather_resources(&game);
-    } else if (strcmp(command, "explore") == 0 ||
-               strcmp(command, "search") == 0) {
-      explore_special_location(&game);
+      gather_resources(game);
+    } else if (strcmp(command, "explore") == 0 || strcmp(command, "search") == 0) {
+      explore_special_location(game);
     } else if (strcmp(command, "talk") == 0) {
-      talk_here(&game);
+      talk_here(game);
     } else if (strcmp(command, "shop") == 0) {
-      shop_here(&game);
+      shop_here(game);
     } else if (strcmp(command, "forge") == 0) {
-      forge_here(&game);
+      forge_here(game);
     } else if (strcmp(command, "rest") == 0) {
-      rest_here(&game);
-    } else if (strcmp(command, "use potion") == 0 ||
-               strcmp(command, "potion") == 0) {
-      use_potion_outside_combat(&game);
+      rest_here(game);
+    } else if (strcmp(command, "use potion") == 0 || strcmp(command, "potion") == 0) {
+      use_potion_outside_combat(game);
     } else if (strcmp(command, "use holy water") == 0 ||
                strcmp(command, "holy water") == 0) {
-      use_holy_water_outside_combat(&game);
+      use_holy_water_outside_combat(game);
     } else if (strcmp(command, "save") == 0 || strcmp(command, "저장") == 0) {
-      if (save_game(&game, SAVE_FILE_PATH)) {
-        printf("게임이 %s 파일에 저장되었습니다.\n", SAVE_FILE_PATH);
+      if (save_game(game, SAVE_FILE_PATH)) {
+        tui_append_log(tui, "게임이 저장되었습니다.");
       } else {
-        printf("저장에 실패했습니다.\n");
+        tui_append_log(tui, "저장에 실패했습니다.");
       }
     } else if (strcmp(command, "load") == 0 || strcmp(command, "불러오기") == 0) {
-      if (load_game(&game, SAVE_FILE_PATH)) {
-        printf("%s 파일에서 게임을 불러왔습니다.\n", SAVE_FILE_PATH);
-        describe_zone(&game);
+      if (load_game(game, SAVE_FILE_PATH)) {
+        tui_append_log(tui, "게임을 불러왔습니다.");
+        describe_zone(game);
       } else {
-        printf("불러오기에 실패했습니다. 저장 파일이 없거나 형식이 올바르지 않습니다.\n");
+        tui_append_log(tui, "불러오기에 실패했습니다.");
       }
     } else if (strcmp(command, "quit") == 0 ||
-               strcmp(command, "exit") == 0 || strcmp(command, "종료") == 0) {
-      printf("가장 가까운 불빛 쪽으로 물러나 오늘의 원정을 마칩니다.\n");
-      break;
+               strcmp(command, "exit") == 0 ||
+               strcmp(command, "종료") == 0) {
+      tui_append_log(tui, "가장 가까운 불빛 쪽으로 물러납니다...");
+      game->running = false;
     } else {
-      printf("알 수 없는 명령어입니다. `help`로 목록을 확인하세요.\n");
+      tui_append_log(tui, "알 수 없는 명령어입니다. `help`로 목록을 확인하세요.");
+    }
+
+    flush_events(game);
+    return;
+  }
+
+  /* Printable character: append to input buffer */
+  if (ch >= 32 && ch < 127 && tui->input_len < (int)sizeof(tui->input_buf) - 1) {
+    tui->input_buf[tui->input_len++] = (char)ch;
+    tui->input_buf[tui->input_len]   = '\0';
+  }
+}
+
+/* ---- Wall-clock helper ---- */
+static uint64_t wall_ms(void)
+{
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+  return (uint64_t)ts.tv_sec * 1000ULL + (uint64_t)(ts.tv_nsec / 1000000);
+}
+
+/* ---- Ending screen (after game loop exits) ---- */
+static void show_ending(GameState *game, TuiState *tui)
+{
+  if (game->final_boss_defeated) {
+    if (game->doom <= 2) {
+      tui_append_log(tui, "★ 찬란한 승리 ★");
+      tui_append_log(tui, "공허의 왕관이 산산이 부서지고 어둠이 왕국 땅 위에서 물러납니다.");
+    } else if (game->doom <= 6) {
+      tui_append_log(tui, "◆ 수호자의 승리 ◆");
+      tui_append_log(tui, "왕관은 부서졌습니다. 그러나 전투의 흔적은 깊습니다.");
+    } else {
+      tui_append_log(tui, "▲ 피루스적 승리 ▲");
+      tui_append_log(tui, "왕관은 부서졌지만, 공허의 그림자가 너무 깊이 스며들었습니다.");
+    }
+    if (game->beacon_lit && game->doom <= 4) {
+      tui_append_log(tui, "[에필로그] 고대 봉화의 빛이 다시 한 번 남쪽 하늘을 물들입니다.");
+    }
+  } else if (!game->running && game->player.hp <= 0) {
+    tui_append_log(tui, "게임 오버.");
+  }
+
+  /* Show final screen for a moment */
+  tui_refresh_all(tui, game);
+  nodelay(stdscr, FALSE);
+  tui_append_log(tui, "--- 계속하려면 아무 키나 누르세요 ---");
+  tui_refresh_all(tui, game);
+  getch();
+}
+
+/* ---- Main entry point ---- */
+int rpg_run(void)
+{
+  GameState game;
+  TuiState  tui;
+
+  srand((unsigned int)time(NULL));
+  init_game(&game);
+
+  /* Initialise TUI */
+  if (!tui_init(&tui)) {
+    /* Fallback: shouldn't happen on modern terminals */
+    fprintf(stderr, "ncurses 초기화에 실패했습니다.\n");
+    shutdown_game(&game);
+    return 1;
+  }
+  tui_set_global(&tui);
+
+  /* Register resize handler */
+  signal(SIGWINCH, handle_sigwinch);
+
+  /* Startup class/name selection */
+  startup_screen(&game, &tui);
+
+  /* Initial zone description in log */
+  describe_zone(&game);
+  show_help(&game);
+  flush_events(&game);
+
+  /* ---- Real-time main loop ---- */
+  uint64_t last_wall = wall_ms();
+
+  while (game.running) {
+    /* Handle terminal resize */
+    if (g_resize_pending) {
+      g_resize_pending = 0;
+      tui_handle_resize(&tui);
+    }
+
+    /* Advance game clock with elapsed wall time */
+    uint64_t now = wall_ms();
+    uint64_t elapsed = now - last_wall;
+    last_wall = now;
+    if (elapsed > 200) elapsed = 200; /* clamp large jumps (e.g. debugger pause) */
+    game.clock_ms += elapsed;
+
+    /* Process any Feather scheduled tasks that are now due */
+    tick_game_tasks(&game);
+    flush_events(&game);
+
+    /* Poll for input (non-blocking) */
+    int ch = getch();
+    if (ch != ERR) {
+      handle_char(&game, &tui, ch);
+    }
+
+    /* Refresh all panels */
+    tui_refresh_all(&tui, &game);
+
+    /* Sleep ~50 ms between ticks (≈20 Hz refresh) */
+    {
+      struct timespec ts = {0, 50000000L};
+      nanosleep(&ts, NULL);
     }
   }
-  if (game.final_boss_defeated) {
-    /* Multiple endings based on doom level and completed quests */
-    if (game.doom <= 2) {
-      printf("\n★ 찬란한 승리 ★\n");
-      printf("공허의 왕관이 산산이 부서지고 어둠이 왕국 땅 위에서 물러납니다. "
-             "가장 적은 희생으로 왕국을 지켜낸 수호자여, 당신의 이름은 돌에 새겨질 "
-             "것입니다. 생존자들이 다시 길을 걷기 시작합니다.\n");
-    } else if (game.doom <= 6) {
-      printf("\n◆ 수호자의 승리 ◆\n");
-      printf("왕관은 부서졌습니다. 그러나 전투의 흔적은 깊습니다. "
-             "왕국은 살아남았지만, 상처를 회복하는 데 오랜 시간이 걸릴 것입니다. "
-             "당신의 희생은 잊히지 않습니다.\n");
-    } else {
-      printf("\n▲ 피루스적 승리 ▲\n");
-      printf("왕관은 부서졌지만, 공허의 그림자가 너무 깊이 스며들었습니다. "
-             "왕국의 형태는 남아 있지만, 회복에는 세대가 걸릴 것입니다. "
-             "그래도, 당신은 해냈습니다.\n");
-    }
-    /* Bonus epilogue based on completed side content */
-    if (game.beacon_lit && game.doom <= 4) {
-      printf("\n[에필로그] 고대 봉화의 빛이 다시 한 번 남쪽 하늘을 물들입니다. "
-             "생존자들이 빛을 향해 모여듭니다. 새로운 마을이 그 자리에 생겨날 것입니다.\n");
-    }
-    if (game.druid_quest == QUEST_COMPLETE) {
-      printf("\n[에필로그] 심숲 분지의 숲이 다시 깊고 조용한 녹색으로 돌아갑니다. "
-             "에이브가 나무 사이에서 웃으며 손을 흔듭니다.\n");
-    }
-    if (game.shore_quest == QUEST_COMPLETE) {
-      printf("\n[에필로그] 메아리 해안의 파도 소리가 맑아졌습니다. "
-             "레나가 해안 동굴 입구에 서서 새벽빛 속 수평선을 바라봅니다.\n");
-    }
-    if (game.citadel_quest == QUEST_COMPLETE) {
-      printf("\n[에필로그] 부서진 성채에 다시 불이 켜집니다. "
-             "왕국의 마지막 대장간에서 새로운 강철이 단련되기 시작했습니다.\n");
-    }
-    printf("\n승리했습니다. 길은 여전히 수호자를 필요로 하지만, 더 이상 공허의 왕관에 "
-           "지배당하지 않습니다.\n");
-  } else if (!game.running && game.player.hp <= 0) {
-    printf("게임 오버.\n");
-  }
+
+  show_ending(&game, &tui);
+  tui_deinit(&tui);
+  tui_set_global(NULL);
   shutdown_game(&game);
   return 0;
 }

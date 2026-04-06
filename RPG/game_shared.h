@@ -10,6 +10,7 @@
 #include <time.h>
 #include <stdarg.h>
 #include "Feather.h"
+#include "game_tui.h"
 #define GAME_MINUTE_MS 1000ULL
 #define MAX_INPUT 256
 #define MAX_EVENTS 24
@@ -250,6 +251,7 @@ int player_attack_value(const GameState *game);
 int player_defense_value(const GameState *game);
 void refresh_rumor(GameState *game);
 void advance_time(GameState *game, int minutes);
+void tick_game_tasks(GameState *game);
 void select_class(GameState *game, PlayerClass cls);
 void init_game(GameState *game);
 void shutdown_game(GameState *game);
@@ -285,5 +287,15 @@ void shop_here(GameState *game);
 void forge_here(GameState *game);
 void rest_here(GameState *game);
 bool maybe_handle_movement_command(GameState *game, const char *command);
+
+/* ---- Route printf through the TUI log ----
+ * All printf() calls in game source files are redirected to game_printf()
+ * which appends the text to the scrolling TUI log (or falls back to stdout
+ * before the TUI is initialised).  This must come after all headers and
+ * declarations so that the real printf prototype is already visible.        */
+#ifndef GAME_TUI_NO_PRINTF_REDIRECT
+#undef  printf
+#define printf  game_printf
+#endif
 
 #endif
