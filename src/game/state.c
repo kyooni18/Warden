@@ -747,6 +747,12 @@ bool load_game(GameState *game, const char *path) {
     memcpy(game->npc_rel, data.npc_rel, sizeof(game->npc_rel));
     memcpy(game->mini_quests, data.mini_quests, sizeof(game->mini_quests));
     game->miniquest_generation_day = data.miniquest_generation_day;
+  } else {
+    memset(game->world_events, 0, sizeof(game->world_events));
+    game->world_event_count = 0;
+    memset(game->npc_rel, 0, sizeof(game->npc_rel));
+    memset(game->mini_quests, 0, sizeof(game->mini_quests));
+    game->miniquest_generation_day = 0;
   }
   game->player = data.player;
   game->remedy_quest = (QuestStage)data.remedy_quest;

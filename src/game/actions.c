@@ -159,7 +159,7 @@ void gather_resources(GameState *game) {
     printf("광석 덩이 %d개를 채굴했습니다.\n", amount);
     progress_miniquests_resource(game, RESOURCE_ORE, amount);
   }
-  if (weather_bonus != 0 || event_bonus > 0) {
+  if (weather_bonus != 0 || (event_bonus / 2) != 0) {
     printf("환경 영향: 날씨 %s%d, 지역 이벤트 +%d.\n",
            weather_bonus >= 0 ? "+" : "", weather_bonus, event_bonus / 2);
   }
