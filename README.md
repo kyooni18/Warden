@@ -21,7 +21,7 @@ make rpg
 make run-rpg
 ```
 
-실행 파일은 `build/CLITextRPG` 경로에 생성됩니다.
+실행 파일은 `build/Warden` 경로에 생성됩니다.
 
 ## 참고
 
