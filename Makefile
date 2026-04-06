@@ -2,7 +2,7 @@ BUILD_DIR ?= build
 
 .DEFAULT_GOAL := rpg
 
-.PHONY: configure build feather rpg run-rpg clean
+.PHONY: configure build feather rpg run-rpg test clean
 
 configure:
 	cmake -S . -B $(BUILD_DIR)
@@ -18,6 +18,10 @@ rpg: configure
 
 run-rpg: rpg
 	./$(BUILD_DIR)/Warden
+
+test: configure
+	cmake --build $(BUILD_DIR) --target test_utils
+	ctest --test-dir $(BUILD_DIR) --output-on-failure
 
 clean:
 	cmake -E rm -rf $(BUILD_DIR)
