@@ -35,8 +35,9 @@ void show_help(const GameState *game) {
   printf("  quests [퀘스트], rumor [소문], time [시간]\n");
   printf("  north/south/east/west [이동], go [방향], travel [방향]\n");
   printf("  scout [정찰], hunt [사냥], gather [채집], explore [탐사]\n");
-  printf("  talk [대화], shop [상점], forge [대장간], rest [휴식]\n");
-  printf("  use potion [포션], use holy water [성수], save [저장], load [불러오기], quit [종료]\n");
+  printf("  interact [상황별 상호작용], talk [대화], shop [상점], forge [대장간], rest [휴식]\n");
+  printf("  buy/sell/craft ... [즉시 거래/제작], use potion/use holy water/use relic dust\n");
+  printf("  save [저장], load [불러오기], quit [종료]\n");
   printf("\n전투 명령어 (공용):\n");
   printf("  attack [공격], cleave(Lv3) [가르기], devastate(Lv6) [궁극 강타]\n");
   printf("  guard [방어], potion [포션], use holy water [성수], bomb [폭탄]\n");
@@ -120,6 +121,9 @@ void show_inventory(const GameState *game) {
     printf(", 영혼의 토템");
   }
   printf("\n");
+  if (game->player.relic_dust > 0) {
+    printf("소모품 힌트: `use relic dust`로 체력을 회복하고 파멸도를 낮출 수 있습니다.\n");
+  }
   if (game->fragment_found[FRAGMENT_TIDAL] || game->fragment_found[FRAGMENT_FROST] ||
       game->fragment_found[FRAGMENT_EMBER]) {
     printf("파편:\n");

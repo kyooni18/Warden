@@ -146,6 +146,8 @@ static void handle_char(GameState *game, TuiState *tui, int ch)
 
     if (maybe_handle_movement_command(game, command)) {
       /* handled */
+    } else if (strcmp(command, "interact") == 0 || strcmp(command, "use") == 0) {
+      interact_here(game);
     } else if (strcmp(command, "help") == 0 || strcmp(command, "도움말") == 0) {
       show_help(game);
     } else if (strcmp(command, "look") == 0 || strcmp(command, "l") == 0) {
@@ -178,6 +180,10 @@ static void handle_char(GameState *game, TuiState *tui, int ch)
       shop_here(game);
     } else if (strcmp(command, "forge") == 0) {
       forge_here(game);
+    } else if (handle_trade_command(game, command)) {
+      /* handled */
+    } else if (handle_craft_command(game, command)) {
+      /* handled */
     } else if (strcmp(command, "rest") == 0) {
       rest_here(game);
     } else if (strcmp(command, "use potion") == 0 || strcmp(command, "potion") == 0) {
@@ -185,6 +191,10 @@ static void handle_char(GameState *game, TuiState *tui, int ch)
     } else if (strcmp(command, "use holy water") == 0 ||
                strcmp(command, "holy water") == 0) {
       use_holy_water_outside_combat(game);
+    } else if (strcmp(command, "use relic dust") == 0 ||
+               strcmp(command, "relic dust") == 0 ||
+               strcmp(command, "dust") == 0) {
+      use_relic_dust_outside_combat(game);
     } else if (strcmp(command, "save") == 0 || strcmp(command, "저장") == 0) {
       if (save_game(game, SAVE_FILE_PATH)) {
         tui_append_log(tui, "게임이 저장되었습니다.");

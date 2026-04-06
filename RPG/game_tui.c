@@ -40,6 +40,18 @@ static TuiState *g_tui = NULL;
 void tui_set_global(TuiState *tui)  { g_tui = tui; }
 TuiState *tui_get_global(void)      { return g_tui; }
 
+static const char *current_objective(const struct GameState *game)
+{
+    if (!game->dawn_key_forged) {
+        if (game->fragments_quest == QUEST_ACTIVE) return "목표: 여명의 파편 3개 회수";
+        if (game->fragments_quest == QUEST_LOCKED) return "목표: 도서관/시장 NPC와 대화";
+        return "목표: 남부 탐색 및 성장";
+    }
+    if (!game->final_boss_defeated) return "목표: 대성당을 넘어 공허 왕좌로 진입";
+    if (!game->citadel_warden_defeated) return "목표: 성채 해방 및 잔여 위협 제거";
+    return "목표: 세계 안정화 및 생존자 지원";
+}
+
 /* ---- Internal: compute layout from current terminal dimensions ---- */
 static void compute_layout(TuiState *tui)
 {
@@ -571,6 +583,19 @@ void tui_draw_info(TuiState *tui, const struct GameState *game)
             }
             if (y < rows - 2 && zone->forge) {
                 mvwaddstr(w, y++, 1, "[대장간 이용 가능]");
+            }
+            if (y < rows - 2 && zone->healer) {
+                mvwaddstr(w, y++, 1, "[치유 지원 가능]");
+            }
+            if (y < rows - 2) {
+                wattron(w, COLOR_PAIR(CP_XP));
+                mvwprintw(w, y++, 1, "%.30s", current_objective(game));
+                wattroff(w, COLOR_PAIR(CP_XP));
+            }
+            if (y < rows - 2) {
+                wattron(w, COLOR_PAIR(CP_DIM) | A_DIM);
+                mvwaddstr(w, y++, 1, "힌트: interact / buy / sell / craft");
+                wattroff(w, COLOR_PAIR(CP_DIM) | A_DIM);
             }
         }
     }

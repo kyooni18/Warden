@@ -47,6 +47,24 @@ void use_holy_water_outside_combat(GameState *game) {
   advance_time(game, 10);
   flush_events(game);
 }
+void use_relic_dust_outside_combat(GameState *game) {
+  int heal;
+  if (game->player.relic_dust <= 0) {
+    printf("유물 가루가 없습니다.\n");
+    return;
+  }
+  game->player.relic_dust--;
+  heal = 8 + game->player.level * 2;
+  game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+  if (game->doom > 0) {
+    game->doom = clamp_int(game->doom - 1, 0, 12);
+    printf("유물 가루를 정화 의식에 사용했습니다. 체력 +%d, 파멸도 -1.\n", heal);
+  } else {
+    printf("유물 가루를 사용해 체력을 +%d 회복했습니다.\n", heal);
+  }
+  advance_time(game, 8);
+  flush_events(game);
+}
 static void handle_bandit_boss_victory(GameState *game) {
   game->bandit_reeve_defeated = true;
   game->caravan_quest = QUEST_COMPLETE;
@@ -433,6 +451,32 @@ void explore_special_location(GameState *game) {
     return;
   }
 }
+void interact_here(GameState *game) {
+  const ZoneData *zone = &kZones[game->player.zone];
+  if (zone_has_merchant(game, game->player.zone)) {
+    printf("상인과 거래할 준비를 합니다.\n");
+    shop_here(game);
+    return;
+  }
+  if (zone->forge) {
+    printf("대장간 설비를 점검합니다.\n");
+    forge_here(game);
+    return;
+  }
+  if (zone->healer && game->player.hp < game->player.max_hp) {
+    int heal = 10 + game->player.level;
+    game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+    printf("치유소에서 응급 처치를 받아 체력 %d를 회복했습니다.\n", heal);
+    advance_time(game, 20);
+    flush_events(game);
+    return;
+  }
+  if (zone->npc != NULL && zone->npc[0] != '\0') {
+    talk_here(game);
+    return;
+  }
+  explore_special_location(game);
+}
 void talk_here(GameState *game) {
   switch (game->player.zone) {
   case ZONE_EMBERFALL_GATE:
@@ -623,11 +667,126 @@ static int potion_price(const GameState *game, bool port_prices) {
   }
   return price;
 }
-void shop_here(GameState *game) {
-  char input[MAX_INPUT];
-  char command[MAX_INPUT];
+bool handle_trade_command(GameState *game, const char *command) {
   int *stock = NULL;
   bool port_prices = false;
+  int price;
+  int bomb_price;
+  int rune_price = 15;
+  int holy_water_price = 20;
+  if (!zone_has_merchant(game, game->player.zone)) {
+    return false;
+  }
+  if (game->player.zone == ZONE_GLOAM_PORT) {
+    stock = &game->port_potions;
+    port_prices = true;
+  } else if (game->player.zone == ZONE_BRASS_MARKET) {
+    stock = &game->market_potions;
+  } else {
+    stock = NULL;
+  }
+  price = potion_price(game, port_prices);
+  bomb_price = port_prices ? 18 : 20;
+  if (strcmp(command, "buy potion") == 0) {
+    if (game->player.gold < price) {
+      printf("골드가 부족합니다.\n");
+      return true;
+    }
+    if (stock != NULL && *stock <= 0) {
+      printf("해당 상인의 재고가 소진되었습니다.\n");
+      return true;
+    }
+    game->player.gold -= price;
+    game->player.potions++;
+    if (stock != NULL) {
+      (*stock)--;
+    }
+    printf("포션을 구매했습니다.\n");
+    advance_time(game, 10);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "buy bomb") == 0) {
+    if (game->player.gold < bomb_price) {
+      printf("골드가 부족합니다.\n");
+      return true;
+    }
+    game->player.gold -= bomb_price;
+    game->player.bombs++;
+    printf("폭탄을 구매했습니다.\n");
+    advance_time(game, 10);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "buy rune") == 0) {
+    if (game->player.gold < rune_price) {
+      printf("골드가 부족합니다.\n");
+      return true;
+    }
+    game->player.gold -= rune_price;
+    game->player.rune_shards++;
+    printf("룬 파편을 구매했습니다.\n");
+    advance_time(game, 10);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "buy holy water") == 0) {
+    if (game->player.gold < holy_water_price) {
+      printf("골드가 부족합니다.\n");
+      return true;
+    }
+    game->player.gold -= holy_water_price;
+    game->player.holy_water++;
+    printf("성수를 구매했습니다.\n");
+    advance_time(game, 10);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "sell herb") == 0) {
+    if (game->player.herbs <= 0) {
+      printf("판매할 약초가 없습니다.\n");
+      return true;
+    }
+    game->player.herbs--;
+    game->player.gold += 3;
+    printf("약초를 3골드에 판매했습니다.\n");
+    advance_time(game, 5);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "sell ore") == 0) {
+    if (game->player.ore <= 0) {
+      printf("판매할 광석이 없습니다.\n");
+      return true;
+    }
+    game->player.ore--;
+    game->player.gold += 4;
+    printf("광석을 4골드에 판매했습니다.\n");
+    advance_time(game, 5);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "sell dust") == 0) {
+    if (game->player.relic_dust <= 0) {
+      printf("판매할 유물 가루가 없습니다.\n");
+      return true;
+    }
+    game->player.relic_dust--;
+    game->player.gold += 8;
+    printf("유물 가루를 8골드에 판매했습니다.\n");
+    advance_time(game, 5);
+    flush_events(game);
+    return true;
+  }
+  return false;
+}
+void shop_here(GameState *game) {
+  int *stock = NULL;
+  bool port_prices = false;
+  int price;
+  int bomb_price;
+  int rune_price = 15;
+  int holy_water_price = 20;
   if (!zone_has_merchant(game, game->player.zone)) {
     printf("지금 이곳에는 거래할 상인이 없습니다.\n");
     return;
@@ -638,231 +797,117 @@ void shop_here(GameState *game) {
   } else if (game->player.zone == ZONE_BRASS_MARKET) {
     stock = &game->market_potions;
   }
-  printf("`buy potion`, `buy bomb`, `buy rune`, `buy holy water`\n"
-         "`sell herb`, `sell ore`, `sell dust`, `leave`\n");
-  while (game->running) {
-    int price = potion_price(game, port_prices);
-    int bomb_price = port_prices ? 18 : 20;
-    int rune_price = 15;
-    int holy_water_price = 20;
-    printf("재고: 포션 %d | 포션 %dg | 폭탄 %dg | 룬 %dg | 성수 %dg\n",
-           stock != NULL ? *stock : 2, price, bomb_price, rune_price,
-           holy_water_price);
-    printf("판매: 약초 3g | 광석 4g | 유물가루 8g\n");
-    if (!read_command("상점> ", input, sizeof(input))) {
-      game->running = false;
-      return;
-    }
-    canonicalize_input(input, command, sizeof(command));
-    if (command[0] == '\0') {
-      continue;
-    }
-    if (strcmp(command, "leave") == 0 || strcmp(command, "exit") == 0) {
-      return;
-    }
-    if (strcmp(command, "buy potion") == 0) {
-      if (game->player.gold < price) {
-        printf("골드가 부족합니다.\n");
-        continue;
-      }
-      if (stock != NULL && *stock <= 0) {
-        printf("해당 상인의 재고가 소진되었습니다.\n");
-        continue;
-      }
-      game->player.gold -= price;
-      game->player.potions++;
-      if (stock != NULL) {
-        (*stock)--;
-      }
-      printf("포션을 구매했습니다.\n");
-      advance_time(game, 10);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "buy bomb") == 0) {
-      if (game->player.gold < bomb_price) {
-        printf("골드가 부족합니다.\n");
-        continue;
-      }
-      game->player.gold -= bomb_price;
-      game->player.bombs++;
-      printf("폭탄을 구매했습니다.\n");
-      advance_time(game, 10);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "buy rune") == 0) {
-      if (game->player.gold < rune_price) {
-        printf("골드가 부족합니다.\n");
-        continue;
-      }
-      game->player.gold -= rune_price;
-      game->player.rune_shards++;
-      printf("룬 파편을 구매했습니다.\n");
-      advance_time(game, 10);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "buy holy water") == 0) {
-      if (game->player.gold < holy_water_price) {
-        printf("골드가 부족합니다.\n");
-        continue;
-      }
-      game->player.gold -= holy_water_price;
-      game->player.holy_water++;
-      printf("성수를 구매했습니다.\n");
-      advance_time(game, 10);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "sell herb") == 0) {
-      if (game->player.herbs <= 0) {
-        printf("판매할 약초가 없습니다.\n");
-        continue;
-      }
-      game->player.herbs--;
-      game->player.gold += 3;
-      printf("약초를 3골드에 판매했습니다.\n");
-      advance_time(game, 5);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "sell ore") == 0) {
-      if (game->player.ore <= 0) {
-        printf("판매할 광석이 없습니다.\n");
-        continue;
-      }
-      game->player.ore--;
-      game->player.gold += 4;
-      printf("광석을 4골드에 판매했습니다.\n");
-      advance_time(game, 5);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "sell dust") == 0) {
-      if (game->player.relic_dust <= 0) {
-        printf("판매할 유물 가루가 없습니다.\n");
-        continue;
-      }
-      game->player.relic_dust--;
-      game->player.gold += 8;
-      printf("유물 가루를 8골드에 판매했습니다.\n");
-      advance_time(game, 5);
-      flush_events(game);
-      continue;
-    }
-    printf("상인이 그 요청을 이해하지 못했습니다.\n");
+  price = potion_price(game, port_prices);
+  bomb_price = port_prices ? 18 : 20;
+  printf("상점 이용 가능: `buy potion`, `buy bomb`, `buy rune`, `buy holy water`\n");
+  printf("판매 가능: `sell herb`, `sell ore`, `sell dust`\n");
+  printf("재고: 포션 %d | 포션 %dg | 폭탄 %dg | 룬 %dg | 성수 %dg\n",
+         stock != NULL ? *stock : 2, price, bomb_price, rune_price,
+         holy_water_price);
+  printf("힌트: 거래 명령을 바로 입력하면 즉시 처리됩니다.\n");
+}
+bool handle_craft_command(GameState *game, const char *command) {
+  if (!kZones[game->player.zone].forge) {
+    return false;
   }
+  if (strcmp(command, "craft blade") == 0) {
+    if (game->player.steel_edge) {
+      printf("이미 검을 재단련했습니다.\n");
+      return true;
+    }
+    if (game->player.ore < 4) {
+      printf("광석 4개가 필요합니다.\n");
+      return true;
+    }
+    game->player.ore -= 4;
+    game->player.steel_edge = true;
+    printf("무기를 재단련해 강철 칼날로 만들었습니다.\n");
+    advance_time(game, 45);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "craft mail") == 0) {
+    if (game->player.ward_mail) {
+      printf("이미 갑옷을 강화했습니다.\n");
+      return true;
+    }
+    if (game->player.ore < 6) {
+      printf("광석 6개가 필요합니다.\n");
+      return true;
+    }
+    game->player.ore -= 6;
+    game->player.ward_mail = true;
+    printf("새 철판을 단련해 수호 갑옷 세트를 완성했습니다.\n");
+    advance_time(game, 55);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "craft bomb") == 0) {
+    if (game->player.ore < 2) {
+      printf("광석 2개가 필요합니다.\n");
+      return true;
+    }
+    game->player.ore -= 2;
+    game->player.bombs++;
+    printf("거칠지만 실용적인 폭탄을 제작했습니다.\n");
+    advance_time(game, 20);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "craft rune") == 0) {
+    if (game->player.ore < 3) {
+      printf("광석 3개가 필요합니다.\n");
+      return true;
+    }
+    game->player.ore -= 3;
+    game->player.rune_shards += 2;
+    printf("광석을 정제해 룬 파편 2개를 만들었습니다.\n");
+    advance_time(game, 30);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "craft holy water") == 0) {
+    if (game->player.ore < 1 || game->player.herbs < 2) {
+      printf("광석 1개와 약초 2개가 필요합니다. (현재: 광석 %d, 약초 %d)\n",
+             game->player.ore, game->player.herbs);
+      return true;
+    }
+    game->player.ore -= 1;
+    game->player.herbs -= 2;
+    game->player.holy_water++;
+    printf("광석 열기로 약초를 달여 성수 1개를 만들었습니다.\n");
+    advance_time(game, 25);
+    flush_events(game);
+    return true;
+  }
+  if (strcmp(command, "craft titan blade") == 0) {
+    if (game->player.titan_blade) {
+      printf("이미 타이탄 검을 보유하고 있습니다.\n");
+      return true;
+    }
+    if (game->player.ore < 6) {
+      printf("광석 6개가 필요합니다. (현재: %d개)\n", game->player.ore);
+      return true;
+    }
+    game->player.ore -= 6;
+    game->player.steel_edge = false;
+    game->player.titan_blade = true;
+    printf("최고의 광석을 용광로에서 단련해 타이탄 검을 완성했습니다. 공격력 +7!\n");
+    advance_time(game, 90);
+    flush_events(game);
+    return true;
+  }
+  return false;
 }
 void forge_here(GameState *game) {
-  char input[MAX_INPUT];
-  char command[MAX_INPUT];
   if (!kZones[game->player.zone].forge) {
     printf("이곳에는 작동 가능한 대장간이 없습니다.\n");
     return;
   }
-  printf("`craft blade`, `craft mail`, `craft bomb`, `craft rune`\n"
-         "`craft holy water`(광석1+약초2), `craft titan blade`(광석6), `leave`\n");
-  while (game->running) {
-    printf("광석 %d | 약초 %d | 검 4개 | 갑옷 6개 | 폭탄 2개 | 룬 증폭기 3개\n",
-           game->player.ore, game->player.herbs);
-    if (!read_command("대장간> ", input, sizeof(input))) {
-      game->running = false;
-      return;
-    }
-    canonicalize_input(input, command, sizeof(command));
-    if (strcmp(command, "leave") == 0 || strcmp(command, "exit") == 0) {
-      return;
-    }
-    if (strcmp(command, "craft blade") == 0) {
-      if (game->player.steel_edge) {
-        printf("이미 검을 재단련했습니다.\n");
-        continue;
-      }
-      if (game->player.ore < 4) {
-        printf("광석 4개가 필요합니다.\n");
-        continue;
-      }
-      game->player.ore -= 4;
-      game->player.steel_edge = true;
-      printf("무기를 재단련해 강철 칼날로 만들었습니다.\n");
-      advance_time(game, 45);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "craft mail") == 0) {
-      if (game->player.ward_mail) {
-        printf("이미 갑옷을 강화했습니다.\n");
-        continue;
-      }
-      if (game->player.ore < 6) {
-        printf("광석 6개가 필요합니다.\n");
-        continue;
-      }
-      game->player.ore -= 6;
-      game->player.ward_mail = true;
-      printf("새 철판을 단련해 수호 갑옷 세트를 완성했습니다.\n");
-      advance_time(game, 55);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "craft bomb") == 0) {
-      if (game->player.ore < 2) {
-        printf("광석 2개가 필요합니다.\n");
-        continue;
-      }
-      game->player.ore -= 2;
-      game->player.bombs++;
-      printf("거칠지만 실용적인 폭탄을 제작했습니다.\n");
-      advance_time(game, 20);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "craft rune") == 0) {
-      if (game->player.ore < 3) {
-        printf("광석 3개가 필요합니다.\n");
-        continue;
-      }
-      game->player.ore -= 3;
-      game->player.rune_shards += 2;
-      printf("광석을 정제해 룬 파편 2개를 만들었습니다.\n");
-      advance_time(game, 30);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "craft holy water") == 0) {
-      if (game->player.ore < 1 || game->player.herbs < 2) {
-        printf("광석 1개와 약초 2개가 필요합니다. (현재: 광석 %d, 약초 %d)\n",
-               game->player.ore, game->player.herbs);
-        continue;
-      }
-      game->player.ore -= 1;
-      game->player.herbs -= 2;
-      game->player.holy_water++;
-      printf("광석 열기로 약초를 달여 성수 1개를 만들었습니다.\n");
-      advance_time(game, 25);
-      flush_events(game);
-      continue;
-    }
-    if (strcmp(command, "craft titan blade") == 0) {
-      if (game->player.titan_blade) {
-        printf("이미 타이탄 검을 보유하고 있습니다.\n");
-        continue;
-      }
-      if (game->player.ore < 6) {
-        printf("광석 6개가 필요합니다. (현재: %d개)\n", game->player.ore);
-        continue;
-      }
-      game->player.ore -= 6;
-      game->player.steel_edge = false;
-      game->player.titan_blade = true;
-      printf("최고의 광석을 용광로에서 단련해 타이탄 검을 완성했습니다. 공격력 +7!\n");
-      advance_time(game, 90);
-      flush_events(game);
-      continue;
-    }
-    printf("대장간이 그 명령에는 반응하지 않습니다.\n");
-  }
+  printf("대장간 제작 가능: `craft blade`, `craft mail`, `craft bomb`, `craft rune`\n");
+  printf("고급 제작: `craft holy water`, `craft titan blade`\n");
+  printf("현재 재료: 광석 %d | 약초 %d\n", game->player.ore, game->player.herbs);
+  printf("힌트: 제작 명령을 바로 입력하면 즉시 처리됩니다.\n");
 }
 void rest_here(GameState *game) {
   int cost = 0;
