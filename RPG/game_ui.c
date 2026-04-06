@@ -36,10 +36,11 @@ void show_help(const GameState *game) {
   printf("  north/south/east/west [이동], go [방향], travel [방향]\n");
   printf("  scout [정찰], hunt [사냥], gather [채집], explore [탐사]\n");
   printf("  talk [대화], shop [상점], forge [대장간], rest [휴식]\n");
-  printf("  use potion [포션], save [저장], load [불러오기], quit [종료]\n");
+  printf("  use potion [포션], use holy water [성수], save [저장], load [불러오기], quit [종료]\n");
   printf("\n전투 명령어 (공용):\n");
-  printf("  attack [공격], cleave(Lv3) [가르기], guard [방어], potion [포션]\n");
-  printf("  bomb [폭탄], flee [도주], status [상태]\n");
+  printf("  attack [공격], cleave(Lv3) [가르기], devastate(Lv6) [궁극 강타]\n");
+  printf("  guard [방어], potion [포션], use holy water [성수], bomb [폭탄]\n");
+  printf("  flee [도주], status [상태]\n");
   if (game != NULL) {
     if (game->player.player_class == CLASS_WARRIOR) {
       printf("\n전사 전용:\n");
@@ -50,6 +51,9 @@ void show_help(const GameState *game) {
     } else if (game->player.player_class == CLASS_MAGE) {
       printf("\n마법사 전용 (룬 파편 소모):\n");
       printf("  fireball [화염구], frost(Lv3) [냉기 화살/동결]\n");
+    } else if (game->player.player_class == CLASS_CLERIC) {
+      printf("\n성직자 전용:\n");
+      printf("  smite [신성 피해+자가치유], holy_barrier(Lv4) [공격차단+치유]\n");
     }
   }
 }
@@ -57,7 +61,7 @@ void show_map(const GameState *game) {
   int row;
   int col;
   printf("\n세계 지도\n");
-  for (row = 0; row < 5; row++) {
+  for (row = 0; row < 6; row++) {
     for (col = 0; col < 4; col++) {
       int zone = row * 4 + col;
       const char *label =
@@ -72,7 +76,7 @@ void show_map(const GameState *game) {
       }
     }
     printf("\n");
-    if (row < 4) {
+    if (row < 5) {
       printf("   |        |        |        |\n");
     }
   }
@@ -88,21 +92,28 @@ void show_stats(const GameState *game) {
   if (game->player.player_class == CLASS_MAGE) {
     printf("룬 파편: %d개\n", game->player.rune_shards);
   }
+  if (game->player.holy_water > 0 || game->player.player_class == CLASS_CLERIC) {
+    printf("성수: %d개\n", game->player.holy_water);
+  }
   if (game->beacon_lit) {
     printf("고대 봉화: 점등됨 (파멸도 억제 효과 활성)\n");
+  }
+  if (game->player.titan_blade) {
+    printf("타이탄 검 장착 중 (공격력 +7)\n");
   }
 }
 void show_inventory(const GameState *game) {
   printf("\n인벤토리\n");
-  printf("포션: %d | 폭탄: %d | 약초: %d | 광석: %d | 유물 가루: %d",
-         game->player.potions, game->player.bombs, game->player.herbs,
-         game->player.ore, game->player.relic_dust);
+  printf("포션: %d | 폭탄: %d | 성수: %d | 약초: %d | 광석: %d | 유물 가루: %d",
+         game->player.potions, game->player.bombs, game->player.holy_water,
+         game->player.herbs, game->player.ore, game->player.relic_dust);
   if (game->player.player_class == CLASS_MAGE || game->player.rune_shards > 0) {
     printf(" | 룬 파편: %d", game->player.rune_shards);
   }
   printf("\n");
   printf("장비: %s, %s, %s",
-         game->player.steel_edge ? "강철 칼날" : "여행자 검",
+         game->player.titan_blade ? "타이탄 검" :
+             (game->player.steel_edge ? "강철 칼날" : "여행자 검"),
          game->player.ward_mail ? "수호 갑옷" : "가죽 방어구",
          game->player.abbey_sigil ? "수도원 인장" : "인장 없음");
   if (game->player.spirit_totem) {
@@ -190,6 +201,22 @@ void show_quests(const GameState *game) {
     printf("  파쇄 금고 탐사: 공허 왕좌 남쪽 파쇄 금고에서 탐사 가능\n");
   } else {
     printf("  파쇄 금고 탐사: 잠김 (여명 없는 왕 격파 후 해제)\n");
+  }
+  if (game->shore_quest == QUEST_ACTIVE) {
+    printf("  해안 정화: 메아리 해안(탐사)에 약초 3개·유물 가루 1개 사용 "
+           "(약초 %d개, 유물 가루 %d개 보유)\n",
+           game->player.herbs, game->player.relic_dust);
+  } else if (game->shore_quest == QUEST_COMPLETE) {
+    printf("  해안 정화: 완료\n");
+  } else {
+    printf("  해안 정화: 미수락 (메아리 해안의 은자 레나에게 대화)\n");
+  }
+  if (game->citadel_quest == QUEST_ACTIVE) {
+    printf("  성채 해방: 부서진 성채(탐사)에서 성채의 마지막 군주를 격파할 것\n");
+  } else if (game->citadel_quest == QUEST_COMPLETE) {
+    printf("  성채 해방: 완료\n");
+  } else {
+    printf("  성채 해방: 미수락 (빛의 첨탑의 사서 에반에게 대화)\n");
   }
 }
 bool read_command(const char *prompt, char *buffer, size_t buffer_size) {

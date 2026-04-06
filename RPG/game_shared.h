@@ -17,7 +17,7 @@
 #define MAX_NAME 48
 #define SAVE_FILE_PATH "savegame.dat"
 #define SAVE_MAGIC 0x52504753u
-#define SAVE_VERSION 2u
+#define SAVE_VERSION 3u
 #define ZONE_NONE (-1)
 typedef enum ZoneId {
   ZONE_EMBERFALL_GATE = 0,
@@ -40,7 +40,11 @@ typedef enum ZoneId {
   ZONE_MAGMA_RIFT = 17,
   ZONE_ANCIENT_BEACON = 18,
   ZONE_SHATTERED_VAULT = 19,
-  ZONE_COUNT = 20
+  ZONE_ECHO_SHORE = 20,
+  ZONE_BONE_TOMB = 21,
+  ZONE_LIGHT_SPIRE = 22,
+  ZONE_IRON_CITADEL = 23,
+  ZONE_COUNT = 24
 } ZoneId;
 typedef enum WeatherId {
   WEATHER_CLEAR = 0,
@@ -54,7 +58,8 @@ typedef enum WeatherId {
 typedef enum PlayerClass {
   CLASS_WARRIOR = 0,
   CLASS_SCOUT   = 1,
-  CLASS_MAGE    = 2
+  CLASS_MAGE    = 2,
+  CLASS_CLERIC  = 3
 } PlayerClass;
 typedef enum ResourceId {
   RESOURCE_NONE = 0,
@@ -115,6 +120,7 @@ typedef struct Player {
   int ore;
   int relic_dust;
   int rune_shards;
+  int holy_water;
   int victories;
   bool discovered[ZONE_COUNT];
   bool claimed_gate_supplies;
@@ -122,6 +128,7 @@ typedef struct Player {
   bool ward_mail;
   bool abbey_sigil;
   bool spirit_totem;
+  bool titan_blade;
 } Player;
 typedef struct Enemy {
   char name[64];
@@ -146,6 +153,7 @@ typedef struct CombatState {
   bool active;
   bool guard_active;
   bool parry_active;
+  bool holy_barrier_active;
   bool enemy_charging;
   int weaken_turns;
   int enemy_burn_turns;
@@ -173,12 +181,15 @@ typedef struct GameState {
   QuestStage beacon_quest;
   QuestStage druid_quest;
   QuestStage vault_quest;
+  QuestStage shore_quest;
+  QuestStage citadel_quest;
   bool fragment_found[FRAGMENT_COUNT];
   bool bandit_reeve_defeated;
   bool dawn_key_forged;
   bool basilica_blessing;
   bool final_boss_defeated;
   bool beacon_lit;
+  bool citadel_warden_defeated;
   bool running;
 } GameState;
 typedef struct SaveData {
@@ -199,12 +210,15 @@ typedef struct SaveData {
   int beacon_quest;
   int druid_quest;
   int vault_quest;
+  int shore_quest;
+  int citadel_quest;
   bool fragment_found[FRAGMENT_COUNT];
   bool bandit_reeve_defeated;
   bool dawn_key_forged;
   bool basilica_blessing;
   bool final_boss_defeated;
   bool beacon_lit;
+  bool citadel_warden_defeated;
   bool running;
 } SaveData;
 
@@ -255,11 +269,13 @@ bool read_command(const char *prompt, char *buffer, size_t buffer_size);
 /* ---- game_combat.c ---- */
 Enemy build_regular_enemy(GameState *game, int zone);
 Enemy build_fragment_guardian(GameState *game, FragmentId fragment);
+Enemy build_citadel_warden(GameState *game);
 Enemy build_final_boss(GameState *game);
 BattleResult run_battle(GameState *game, Enemy enemy);
 
 /* ---- game_actions.c ---- */
 void use_potion_outside_combat(GameState *game);
+void use_holy_water_outside_combat(GameState *game);
 void hunt_current_zone(GameState *game);
 void scout_zone(GameState *game);
 void gather_resources(GameState *game);

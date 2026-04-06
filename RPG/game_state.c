@@ -62,6 +62,7 @@ const char *class_name(PlayerClass cls) {
   case CLASS_WARRIOR: return "전사";
   case CLASS_SCOUT:   return "척후";
   case CLASS_MAGE:    return "마법사";
+  case CLASS_CLERIC:  return "성직자";
   default:            return "수호자";
   }
 }
@@ -72,7 +73,7 @@ static int zone_north(int zone) {
   return zone >= 4 ? zone - 4 : ZONE_NONE;
 }
 static int zone_south(int zone) {
-  return zone < 16 ? zone + 4 : ZONE_NONE;
+  return zone < 20 ? zone + 4 : ZONE_NONE;
 }
 static int zone_west(int zone) {
   return zone % 4 != 0 ? zone - 1 : ZONE_NONE;
@@ -113,7 +114,9 @@ void show_exits(int zone) {
 }
 int player_attack_value(const GameState *game) {
   int attack = game->player.strength + game->player.level * 2;
-  if (game->player.steel_edge) {
+  if (game->player.titan_blade) {
+    attack += 7;
+  } else if (game->player.steel_edge) {
     attack += 4;
   }
   if (game->player.abbey_sigil) {
@@ -166,6 +169,18 @@ void refresh_rumor(GameState *game) {
     fill_rumor(
         game,
         "폐허 대성당에서 종 없이 울림이 시작됐다. 왕좌가 깨어난다.");
+    return;
+  }
+  if (!game->citadel_warden_defeated) {
+    fill_rumor(
+        game,
+        "부서진 성채에서 철갑 구울의 행진 소리가 들린다. 누군가 해방시켜야 한다.");
+    return;
+  }
+  if (game->shore_quest == QUEST_ACTIVE) {
+    fill_rumor(
+        game,
+        "메아리 해안의 은자 레나가 신성한 의식을 위한 재료를 기다리고 있다.");
     return;
   }
   fill_rumor(
@@ -316,6 +331,17 @@ void select_class(GameState *game, PlayerClass cls) {
     game->player.bombs = 0;
     game->player.rune_shards = 3;
     break;
+  case CLASS_CLERIC:
+    game->player.max_hp = 28;
+    game->player.hp = 28;
+    game->player.strength = 6;
+    game->player.guard = 4;
+    game->player.gold = 22;
+    game->player.potions = 4;
+    game->player.bombs = 0;
+    game->player.holy_water = 2;
+    game->player.rune_shards = 0;
+    break;
   }
 }
 void shutdown_game(GameState *game) {
@@ -345,12 +371,15 @@ bool save_game(const GameState *game, const char *path) {
   data.beacon_quest = (int)game->beacon_quest;
   data.druid_quest = (int)game->druid_quest;
   data.vault_quest = (int)game->vault_quest;
+  data.shore_quest = (int)game->shore_quest;
+  data.citadel_quest = (int)game->citadel_quest;
   memcpy(data.fragment_found, game->fragment_found, sizeof(data.fragment_found));
   data.bandit_reeve_defeated = game->bandit_reeve_defeated;
   data.dawn_key_forged = game->dawn_key_forged;
   data.basilica_blessing = game->basilica_blessing;
   data.final_boss_defeated = game->final_boss_defeated;
   data.beacon_lit = game->beacon_lit;
+  data.citadel_warden_defeated = game->citadel_warden_defeated;
   data.running = game->running;
   if (fwrite(&data, sizeof(data), 1, file) != 1) {
     fclose(file);
@@ -395,12 +424,15 @@ bool load_game(GameState *game, const char *path) {
   game->beacon_quest = (QuestStage)data.beacon_quest;
   game->druid_quest = (QuestStage)data.druid_quest;
   game->vault_quest = (QuestStage)data.vault_quest;
+  game->shore_quest = (QuestStage)data.shore_quest;
+  game->citadel_quest = (QuestStage)data.citadel_quest;
   memcpy(game->fragment_found, data.fragment_found, sizeof(game->fragment_found));
   game->bandit_reeve_defeated = data.bandit_reeve_defeated;
   game->dawn_key_forged = data.dawn_key_forged;
   game->basilica_blessing = data.basilica_blessing;
   game->final_boss_defeated = data.final_boss_defeated;
   game->beacon_lit = data.beacon_lit;
+  game->citadel_warden_defeated = data.citadel_warden_defeated;
   game->running = data.running;
   game->event_count = 0;
   game->combat.active = false;

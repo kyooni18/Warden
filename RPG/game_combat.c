@@ -266,6 +266,70 @@ Enemy build_regular_enemy(GameState *game, int zone) {
           "망령이 기억을 지우는 저주를 내뿜습니다.");
     }
     break;
+  case ZONE_ECHO_SHORE:
+    if (roll < 50) {
+      enemy = make_enemy(
+          "조류 정령", 32, 10, 5, 19, 17, 3, ENEMY_ROLE_CASTER, false, false,
+          false,
+          "달빛을 받아 빛나는 파도에서 조류 정령이 솟아오릅니다.",
+          "정령이 불타는 해류를 뿌려 화상을 남깁니다.");
+      enemy.burns_player = true;
+    } else {
+      enemy = make_enemy(
+          "해안 심연체", 36, 11, 6, 21, 19, 4, ENEMY_ROLE_BRUTE, false, false,
+          false,
+          "난파선 잔해 아래에서 기어 나온 거대한 심연체가 집게발을 휘두릅니다.",
+          "심연체가 집게발로 살을 찢으며 출혈을 일으킵니다.");
+      enemy.bleeds_player = true;
+    }
+    break;
+  case ZONE_BONE_TOMB:
+    if (roll < 50) {
+      enemy = make_enemy(
+          "해골 기사", 40, 12, 7, 24, 22, 4, ENEMY_ROLE_BRUTE, false, false,
+          true,
+          "녹슨 철갑을 두른 해골 기사가 지하 묘지 깊은 곳에서 걸어 나옵니다.",
+          "기사가 낡은 전쟁 도끼를 들어 쇠약화 일격을 내립니다.");
+    } else {
+      enemy = make_enemy(
+          "저주받은 군주", 45, 13, 7, 27, 25, 5, ENEMY_ROLE_CASTER, false,
+          false, true,
+          "화려했던 갑옷의 흔적이 남은 저주받은 군주가 어둠 속에서 왕좌에서 일어섭니다.",
+          "군주가 저주의 화염을 발사해 주변을 불태웁니다.");
+      enemy.burns_player = true;
+    }
+    break;
+  case ZONE_LIGHT_SPIRE:
+    if (roll < 50) {
+      enemy = make_enemy(
+          "길 잃은 음영", 24, 8, 4, 15, 13, 2, ENEMY_ROLE_SKIRMISHER, false,
+          false, false,
+          "첨탑 외곽을 떠도는 음영이 빛에 이끌려 다가옵니다.",
+          "음영이 빠른 허깨비 일격으로 파고듭니다.");
+    } else {
+      enemy = make_enemy(
+          "부서진 수호령", 28, 9, 4, 17, 15, 3, ENEMY_ROLE_CASTER, false,
+          false, true,
+          "한때 첨탑을 지켰던 수호령이 공허에 오염되어 공격해 옵니다.",
+          "수호령이 잔재 에너지로 집중을 흐트러뜨립니다.");
+    }
+    break;
+  case ZONE_IRON_CITADEL:
+    if (roll < 50) {
+      enemy = make_enemy(
+          "철갑 구울", 42, 12, 8, 25, 23, 4, ENEMY_ROLE_BRUTE, false, false,
+          false,
+          "성채 복도에서 두꺼운 철갑 조각을 두른 구울이 몸을 일으킵니다.",
+          "구울이 강철 발톱으로 짓눌러 파고듭니다.");
+    } else {
+      enemy = make_enemy(
+          "성채 군주", 50, 14, 9, 30, 27, 5, ENEMY_ROLE_BRUTE, false, false,
+          false,
+          "왕국의 갑주를 착용한 성채 군주가 무너진 왕좌에서 일어섭니다.",
+          "군주가 전력으로 철갑 일격을 내려칩니다.");
+      enemy.bleeds_player = true;
+    }
+    break;
   default:
     enemy = make_enemy(
         "길목 잠복자", 20, 6, 2, 8, 7, 1, ENEMY_ROLE_SKIRMISHER, false, false,
@@ -318,6 +382,16 @@ Enemy build_fragment_guardian(GameState *game, FragmentId fragment) {
   scale_enemy(game, &enemy, 4);
   return enemy;
 }
+Enemy build_citadel_warden(GameState *game) {
+  Enemy boss =
+      make_enemy("성채의 마지막 군주", 65, 15, 9, 50, 40, 5, ENEMY_ROLE_BOSS,
+                 true, false, true,
+                 "성채 내부 깊숙한 왕좌의 방에서 공허에 물든 성채의 마지막 군주가 "
+                 "철갑 투구를 올려씁니다.",
+                 "군주가 성채 전체를 울리는 고함과 함께 전력의 철갑 일격을 날립니다.");
+  scale_enemy(game, &boss, 5);
+  return boss;
+}
 Enemy build_final_boss(GameState *game) {
   Enemy boss =
       make_enemy("여명 없는 왕", 78, 16, 8, 80, 0, 6, ENEMY_ROLE_BOSS,
@@ -343,19 +417,20 @@ static void award_post_battle_loot(GameState *game, const Enemy *enemy, int zone
   grant_xp(game, enemy->xp_reward);
   game->player.victories++;
   if (zone == ZONE_MOONFEN || zone == ZONE_CINDER_GROVE ||
-      zone == ZONE_DEEPWOOD_HOLLOW) {
+      zone == ZONE_DEEPWOOD_HOLLOW || zone == ZONE_ECHO_SHORE) {
     if (rand() % 100 < 35) {
       game->player.herbs++;
       printf("전투의 여파 속에서 쓸 만한 약초 묶음을 찾아냈습니다.\n");
     }
   } else if (zone == ZONE_IRONWOOD_PASS || zone == ZONE_ASHEN_QUARRY ||
-             zone == ZONE_OBSIDIAN_CRATER || zone == ZONE_MAGMA_RIFT) {
+             zone == ZONE_OBSIDIAN_CRATER || zone == ZONE_MAGMA_RIFT ||
+             zone == ZONE_IRON_CITADEL) {
     if (rand() % 100 < 35) {
       game->player.ore++;
       printf("전장에서 가공 가능한 광석 덩이를 떼어냈습니다.\n");
     }
   } else if (zone == ZONE_SUNKEN_ARCHIVE || zone == ZONE_RUINED_BASILICA ||
-             zone == ZONE_SHATTERED_VAULT) {
+             zone == ZONE_SHATTERED_VAULT || zone == ZONE_BONE_TOMB) {
     if (rand() % 100 < 25) {
       game->player.relic_dust++;
       printf("폐허에서 반짝이는 유물 가루를 모았습니다.\n");
@@ -381,6 +456,7 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
   game->combat.active = true;
   game->combat.guard_active = false;
   game->combat.parry_active = false;
+  game->combat.holy_barrier_active = false;
   game->combat.enemy_charging = false;
   game->combat.weaken_turns = 0;
   game->combat.enemy_burn_turns = 0;
@@ -423,13 +499,19 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       continue;
     }
     if (strcmp(command, "help") == 0) {
-      printf("공용: attack, cleave(Lv3), guard, potion, bomb, flee, status\n");
+      printf("공용: attack, cleave(Lv3), devastate(Lv6), guard, potion, bomb, flee, status\n");
       if (game->player.player_class == CLASS_WARRIOR) {
         printf("전사: parry, bash(Lv5)\n");
       } else if (game->player.player_class == CLASS_SCOUT) {
         printf("척후: backstab, vanish(Lv4)\n");
       } else if (game->player.player_class == CLASS_MAGE) {
         printf("마법사: fireball(룬1), frost(Lv3, 룬1)\n");
+      } else if (game->player.player_class == CLASS_CLERIC) {
+        printf("성직자: smite(신성 피해+자가치유), holy_barrier(Lv4, 공격차단+치유)\n");
+      }
+      if (game->player.holy_water > 0) {
+        printf("공용 아이템: use holy water (체력 25 회복+DoT 제거, 현재 %d개)\n",
+               game->player.holy_water);
       }
       continue;
     }
@@ -443,6 +525,9 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       if (game->player.player_class == CLASS_MAGE) {
         printf("룬 파편: %d개\n", game->player.rune_shards);
       }
+      if (game->player.holy_water > 0) {
+        printf("성수: %d개\n", game->player.holy_water);
+      }
       continue;
     }
     /* ---- Universal commands ---- */
@@ -452,12 +537,43 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
         printf("포션이 없습니다.\n");
         continue;
       }
-      game->player.potions--;
-      game->player.hp =
-          clamp_int(game->player.hp + 18 + game->player.level * 2, 0,
-                    game->player.max_hp);
-      printf("포션을 마시고 자세를 가다듬습니다. (체력 %d/%d)\n",
-             game->player.hp, game->player.max_hp);
+      {
+        int heal = 18 + game->player.level * 2;
+        /* Cleric passive: potions heal +8 extra */
+        if (game->player.player_class == CLASS_CLERIC) {
+          heal += 8;
+        }
+        /* Rain weather: potions heal +5 extra */
+        if (game->weather == WEATHER_RAIN) {
+          heal += 5;
+        }
+        game->player.potions--;
+        game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+        printf("포션을 마시고 자세를 가다듬습니다. (체력 %d/%d)\n",
+               game->player.hp, game->player.max_hp);
+      }
+      spend_turn = true;
+    } else if (strcmp(command, "use holy water") == 0 ||
+               strcmp(command, "holy water") == 0) {
+      if (game->player.holy_water <= 0) {
+        printf("성수가 없습니다.\n");
+        continue;
+      }
+      {
+        int heal = 25;
+        if (game->player.player_class == CLASS_CLERIC) {
+          heal += 10;
+        }
+        if (game->weather == WEATHER_RAIN) {
+          heal += 5;
+        }
+        game->player.holy_water--;
+        game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+        game->combat.player_bleed_turns = 0;
+        game->combat.weaken_turns = 0;
+        printf("성수를 사용해 체력 %d를 회복하고 상태이상을 해제했습니다. (체력 %d/%d)\n",
+               heal, game->player.hp, game->player.max_hp);
+      }
       spend_turn = true;
     } else if (strcmp(command, "bomb") == 0) {
       if (game->player.bombs <= 0) {
@@ -473,12 +589,39 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
     } else if (strcmp(command, "guard") == 0) {
       game->combat.guard_active = true;
       game->combat.parry_active = false;
+      game->combat.holy_barrier_active = false;
       if (game->player.abbey_sigil) {
         game->player.hp =
             clamp_int(game->player.hp + 2, 0, game->player.max_hp);
         printf("무기를 세워 자세를 잡자 수도원 인장이 빛납니다.\n");
       } else {
         printf("다음 공격에 대비해 방어 태세를 취합니다.\n");
+      }
+      spend_turn = true;
+    } else if (strcmp(command, "devastate") == 0) {
+      if (game->player.level < 6) {
+        printf("아직 궁극 강타를 익히지 못했습니다. (레벨 6 필요)\n");
+        continue;
+      }
+      if (game->player.hp <= 15) {
+        printf("체력이 너무 낮아 궁극 강타를 사용할 수 없습니다. (체력 15 초과 필요)\n");
+        continue;
+      }
+      {
+        /* Costs 12 HP, ignores 75% of enemy defense */
+        int attack = player_attack_value(game) * 2 + 10;
+        int quarter_def = game->combat.enemy.defense / 4;
+        if (game->combat.weaken_turns > 0) {
+          attack -= 5;
+        }
+        player_damage = compute_damage(attack, quarter_def);
+        game->player.hp -= 12;
+        game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - player_damage, 0,
+                                          game->combat.enemy.max_hp);
+        printf("전력을 불태워 궁극 강타! 자신에게 12 피해를 감수하며 %s에게 %d를 "
+               "입혔습니다. (체력 %d/%d)\n",
+               game->combat.enemy.name, player_damage,
+               game->player.hp, game->player.max_hp);
       }
       spend_turn = true;
     } else if (strcmp(command, "cleave") == 0) {
@@ -655,6 +798,46 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       printf("냉기 화살이 %s을(를) 관통해 %d 피해를 주고 동결시켰습니다!\n",
              game->combat.enemy.name, player_damage);
       spend_turn = true;
+    }
+    /* ---- Cleric abilities ---- */
+    else if (strcmp(command, "smite") == 0) {
+      if (game->player.player_class != CLASS_CLERIC) {
+        printf("성직자 전용 기술입니다.\n");
+        continue;
+      }
+      {
+        int attack = player_attack_value(game) + 3;
+        int half_defense = game->combat.enemy.defense / 2;
+        if (game->combat.weaken_turns > 0) {
+          attack -= 2;
+        }
+        player_damage = compute_damage(attack, half_defense);
+        /* Ash weather: caster enemies deal extra, but smite ignores that */
+        game->combat.enemy.hp = clamp_int(game->combat.enemy.hp - player_damage, 0,
+                                          game->combat.enemy.max_hp);
+        int self_heal = player_damage / 3;
+        game->player.hp = clamp_int(game->player.hp + self_heal, 0,
+                                    game->player.max_hp);
+        printf("신성한 빛이 %s을(를) 강타해 %d 피해를 입히고, "
+               "신성력으로 체력 %d를 회복했습니다.\n",
+               game->combat.enemy.name, player_damage, self_heal);
+      }
+      spend_turn = true;
+    } else if (strcmp(command, "holy_barrier") == 0 ||
+               strcmp(command, "holy barrier") == 0) {
+      if (game->player.player_class != CLASS_CLERIC) {
+        printf("성직자 전용 기술입니다.\n");
+        continue;
+      }
+      if (game->player.level < 4) {
+        printf("아직 신성 방벽을 익히지 못했습니다. (레벨 4 필요)\n");
+        continue;
+      }
+      game->combat.holy_barrier_active = true;
+      game->combat.guard_active = false;
+      game->combat.parry_active = false;
+      printf("신성한 빛의 방벽을 펼칩니다. 다음 공격을 완전히 차단하고 체력을 회복합니다.\n");
+      spend_turn = true;
     } else {
       printf("그 명령어는 전투 중 사용할 수 없습니다.\n");
       continue;
@@ -738,12 +921,33 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       if (game->combat.enemy.role == ENEMY_ROLE_BRUTE) {
         printf("%s이(가) 압도적인 힘으로 들이받습니다.\n", game->combat.enemy.name);
       } else if (game->combat.enemy.role == ENEMY_ROLE_CASTER) {
-        printf("%s이(가) 악의적인 마법을 퍼붓습니다.\n", game->combat.enemy.name);
+        /* Ash weather: caster enemies deal +2 extra damage */
+        if (game->weather == WEATHER_ASH) {
+          enemy_damage += 2;
+          printf("%s이(가) 재 연기를 틈타 강한 마법을 날립니다.\n",
+                 game->combat.enemy.name);
+        } else {
+          printf("%s이(가) 악의적인 마법을 퍼붓습니다.\n", game->combat.enemy.name);
+        }
       } else {
-        printf("%s이(가) 재빠르게 공격합니다.\n", game->combat.enemy.name);
+        /* Wind weather: 20% chance of enemy attack missing */
+        if (game->weather == WEATHER_WIND && rand() % 100 < 20) {
+          enemy_damage = 0;
+          printf("강한 돌풍이 %s의 공격을 빗나가게 합니다!\n",
+                 game->combat.enemy.name);
+        } else {
+          printf("%s이(가) 재빠르게 공격합니다.\n", game->combat.enemy.name);
+        }
       }
     }
-    /* ---- Apply parry (warrior) ---- */
+    /* Storm weather: all attacks reduced by 2 (minimum 1) */
+    if (game->weather == WEATHER_STORM && enemy_damage > 1) {
+      enemy_damage -= 2;
+      if (enemy_damage < 1) {
+        enemy_damage = 1;
+      }
+    }
+    /* ---- Apply block mechanics (warrior parry / cleric holy_barrier) ---- */
     if (game->combat.parry_active && enemy_damage > 0) {
       int counter = enemy_damage / 4;
       /* Ceiling division: parry reduces incoming damage to ~25% (rounded up),
@@ -754,12 +958,19 @@ BattleResult run_battle(GameState *game, Enemy enemy) {
       printf("막기 성공! 대부분의 피해를 흡수하고 %s에게 %d를 반격했습니다.\n",
              game->combat.enemy.name, counter);
       game->combat.parry_active = false;
+    } else if (game->combat.holy_barrier_active && enemy_damage > 0) {
+      int heal = 10;
+      enemy_damage = 0;
+      game->player.hp = clamp_int(game->player.hp + heal, 0, game->player.max_hp);
+      printf("신성 방벽이 공격을 완전히 차단하고 체력 %d를 회복시킵니다.\n", heal);
+      game->combat.holy_barrier_active = false;
     } else if (game->combat.guard_active && enemy_damage > 0) {
       enemy_damage = (enemy_damage + 1) / 2;
       printf("방어로 피해 일부를 흡수했습니다.\n");
       game->combat.guard_active = false;
     } else {
       game->combat.parry_active = false;
+      game->combat.holy_barrier_active = false;
       game->combat.guard_active = false;
     }
     if (enemy_damage > 0) {
