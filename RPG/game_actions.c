@@ -351,12 +351,12 @@ void explore_special_location(GameState *game) {
     advance_time(game, 30);
     flush_events(game);
     if (rand() % 100 < 60) {
+      int dust_found = 1 + rand() % 2;
       printf("오래된 관에서 유물을 발견했습니다.\n");
       int gold_found = roll_range(10, 25);
       game->player.gold += gold_found;
-      game->player.relic_dust += 1 + rand() % 2;
-      printf("골드 %d, 유물 가루 %d개를 수습했습니다.\n", gold_found,
-             game->player.relic_dust > 1 ? 2 : 1);
+      game->player.relic_dust += dust_found;
+      printf("골드 %d, 유물 가루 %d개를 수습했습니다.\n", gold_found, dust_found);
     } else {
       printf("무덤 내부에 아무것도 남아 있지 않습니다.\n");
     }
